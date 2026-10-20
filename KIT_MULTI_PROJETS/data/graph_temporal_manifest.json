@@ -1,0 +1,430 @@
+{
+  "description": "Graphes par release, arêtes temporelles des classes homonymes, nœuds non filtrés par intersection stricte",
+  "windows": [
+    {
+      "project": "ant",
+      "target": "1.5",
+      "versions": [
+        "1.3",
+        "1.4",
+        "1.5"
+      ],
+      "nodes": [
+        125,
+        178,
+        293
+      ],
+      "edges": [
+        102,
+        177,
+        663
+      ],
+      "temporal_links": 293,
+      "targets": 118,
+      "matched_sources": [
+        116,
+        166,
+        270
+      ]
+    },
+    {
+      "project": "ant",
+      "target": "1.6",
+      "versions": [
+        "1.4",
+        "1.5",
+        "1.6"
+      ],
+      "nodes": [
+        178,
+        293,
+        351
+      ],
+      "edges": [
+        177,
+        663,
+        1009
+      ],
+      "temporal_links": 460,
+      "targets": 167,
+      "matched_sources": [
+        166,
+        270,
+        350
+      ]
+    },
+    {
+      "project": "ant",
+      "target": "1.7",
+      "versions": [
+        "1.5",
+        "1.6",
+        "1.7"
+      ],
+      "nodes": [
+        293,
+        351,
+        745
+      ],
+      "edges": [
+        663,
+        1009,
+        2454
+      ],
+      "temporal_links": 642,
+      "targets": 292,
+      "matched_sources": [
+        270,
+        350,
+        741
+      ]
+    },
+    {
+      "project": "camel",
+      "target": "1.4",
+      "versions": [
+        "1.0",
+        "1.2",
+        "1.4"
+      ],
+      "nodes": [
+        339,
+        608,
+        872
+      ],
+      "edges": [
+        917,
+        1749,
+        2437
+      ],
+      "temporal_links": 831,
+      "targets": 252,
+      "matched_sources": [
+        339,
+        595,
+        847
+      ]
+    },
+    {
+      "project": "camel",
+      "target": "1.6",
+      "versions": [
+        "1.2",
+        "1.4",
+        "1.6"
+      ],
+      "nodes": [
+        608,
+        872,
+        965
+      ],
+      "edges": [
+        1749,
+        2437,
+        2882
+      ],
+      "temporal_links": 1426,
+      "targets": 565,
+      "matched_sources": [
+        595,
+        847,
+        934
+      ]
+    },
+    {
+      "project": "jedit",
+      "target": "4.1",
+      "versions": [
+        "3.2",
+        "4.0",
+        "4.1"
+      ],
+      "nodes": [
+        272,
+        306,
+        312
+      ],
+      "edges": [
+        149,
+        210,
+        195
+      ],
+      "temporal_links": 556,
+      "targets": 253,
+      "matched_sources": [
+        248,
+        281,
+        266
+      ]
+    },
+    {
+      "project": "jedit",
+      "target": "4.2",
+      "versions": [
+        "4.0",
+        "4.1",
+        "4.2"
+      ],
+      "nodes": [
+        306,
+        312,
+        367
+      ],
+      "edges": [
+        210,
+        195,
+        246
+      ],
+      "temporal_links": 582,
+      "targets": 272,
+      "matched_sources": [
+        281,
+        266,
+        355
+      ]
+    },
+    {
+      "project": "jedit",
+      "target": "4.3",
+      "versions": [
+        "4.1",
+        "4.2",
+        "4.3"
+      ],
+      "nodes": [
+        312,
+        367,
+        492
+      ],
+      "edges": [
+        195,
+        246,
+        852
+      ],
+      "temporal_links": 515,
+      "targets": 179,
+      "matched_sources": [
+        266,
+        355,
+        487
+      ]
+    },
+    {
+      "project": "log4j",
+      "target": "1.2",
+      "versions": [
+        "1.0",
+        "1.1",
+        "1.2"
+      ],
+      "nodes": [
+        135,
+        109,
+        205
+      ],
+      "edges": [
+        344,
+        271,
+        332
+      ],
+      "temporal_links": 201,
+      "targets": 93,
+      "matched_sources": [
+        115,
+        100,
+        188
+      ]
+    },
+    {
+      "project": "lucene",
+      "target": "2.4",
+      "versions": [
+        "2.0",
+        "2.2",
+        "2.4"
+      ],
+      "nodes": [
+        195,
+        247,
+        340
+      ],
+      "edges": [
+        252,
+        329,
+        473
+      ],
+      "temporal_links": 427,
+      "targets": 180,
+      "matched_sources": [
+        186,
+        234,
+        330
+      ]
+    },
+    {
+      "project": "poi",
+      "target": "2.5",
+      "versions": [
+        "1.5",
+        "2.0",
+        "2.5"
+      ],
+      "nodes": [
+        237,
+        314,
+        385
+      ],
+      "edges": [
+        384,
+        512,
+        602
+      ],
+      "temporal_links": 538,
+      "targets": 224,
+      "matched_sources": [
+        235,
+        309,
+        380
+      ]
+    },
+    {
+      "project": "poi",
+      "target": "3.0",
+      "versions": [
+        "2.0",
+        "2.5",
+        "3.0"
+      ],
+      "nodes": [
+        314,
+        385,
+        442
+      ],
+      "edges": [
+        512,
+        602,
+        788
+      ],
+      "temporal_links": 696,
+      "targets": 311,
+      "matched_sources": [
+        309,
+        380,
+        438
+      ]
+    },
+    {
+      "project": "synapse",
+      "target": "1.2",
+      "versions": [
+        "1.0",
+        "1.1",
+        "1.2"
+      ],
+      "nodes": [
+        157,
+        222,
+        256
+      ],
+      "edges": [
+        518,
+        605,
+        769
+      ],
+      "temporal_links": 371,
+      "targets": 149,
+      "matched_sources": [
+        157,
+        205,
+        256
+      ]
+    },
+    {
+      "project": "velocity",
+      "target": "1.6",
+      "versions": [
+        "1.4",
+        "1.5",
+        "1.6"
+      ],
+      "nodes": [
+        196,
+        214,
+        229
+      ],
+      "edges": [
+        516,
+        768,
+        805
+      ],
+      "temporal_links": 364,
+      "targets": 152,
+      "matched_sources": [
+        192,
+        214,
+        229
+      ]
+    },
+    {
+      "project": "xalan",
+      "target": "2.6",
+      "versions": [
+        "2.4",
+        "2.5",
+        "2.6"
+      ],
+      "nodes": [
+        723,
+        803,
+        885
+      ],
+      "edges": [
+        2281,
+        2473,
+        2609
+      ],
+      "temporal_links": 1455,
+      "targets": 655,
+      "matched_sources": [
+        668,
+        754,
+        875
+      ]
+    },
+    {
+      "project": "xerces",
+      "target": "1.3",
+      "versions": [
+        "init",
+        "1.2",
+        "1.3"
+      ],
+      "nodes": [
+        162,
+        440,
+        453
+      ],
+      "edges": [
+        321,
+        587,
+        639
+      ],
+      "temporal_links": 549,
+      "targets": 114,
+      "matched_sources": [
+        162,
+        436,
+        446
+      ]
+    }
+  ],
+  "limits": [
+    "Les liens temporels relient les noms pleinement qualifies strictement identiques entre releases consecutives, sans detection des renommages.",
+    "Les arêtes spatiales incluent uniquement les imports Java explicites non statiques, appariés a des classes du jeu CSV. Graphe partiel.",
+    "Les features des graphes sont brutes, sans normalisation; les features X des fichiers originaux sont normalisees.",
+    "Les nœuds du graphe incluent toutes les classes des CSV pour chaque version, y compris celles absentes des fenetres TCN strictes.",
+    "Les arêtes sont orientées comme les imports; inverser ou symétriser est un choix du modèle.",
+    "Le protocole existant reste une detection de defauts de la version courante, et non une prediction t+1.",
+    "Le TCN et GraphSAGE du code actuel utilisent les fichiers anciens; les fichiers enrichis sont fournis pour extensions/analyses, sans affirmer une integration du GNN temporel."
+  ]
+}

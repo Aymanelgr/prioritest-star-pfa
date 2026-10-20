@@ -1,0 +1,11 @@
+# Captures d'écran sans rapport avec le projet
+WhatsApp Image*.jpeg
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Sorties d'entraînement
+KIT_MULTI_PROJETS/results/*
+!KIT_MULTI_PROJETS/results/README.txt

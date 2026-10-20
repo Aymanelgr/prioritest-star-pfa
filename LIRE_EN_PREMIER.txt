@@ -1,0 +1,8 @@
+PRIORITEST-STAR — Dossier étudiant multi-projets
+
+1. Lire FICHE_PFA_PRIORITEST_STAR.pdf et GUIDE_ETUDIANTS_PRIORITEST_STAR.pdf.
+2. Consulter KIT_MULTI_PROJETS/README.md et data/manifest_multi.json.
+3. Notebook Colab fourni = démonstration Ant uniquement (ancienne organisation).
+4. Pour JEdit/Ant/Camel/POI, utiliser le lanceur multi-projets run_project.py.
+5. Les projets avec une seule fenêtre ne permettent PAS à eux seuls un découpage chronologique train/test.
+6. Les résultats du petit test JEdit présent dans results/ doivent être considérés comme un simple contrôle de fonctionnement, pas comme une conclusion scientifique.
