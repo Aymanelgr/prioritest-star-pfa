@@ -1,7 +1,7 @@
 """PRIORITEST-STAR — lanceur complet des ablations (fiche PFA §6) + variante améliorée STAR+.
 
 Exemples :
-  python run_star.py --project ant --seeds 42 43 44
+  python run_star.py --project ant --seeds 42 43 44 45 46
   python run_star.py --project jedit --seeds 42 43 44 45 46 --tune
   python run_star.py --project ant --variants A2_TCN_BCE A6_STAR_full --epochs 20
 
@@ -167,7 +167,7 @@ def tune(project, data, tr, val, epochs, patience, device, seed, names, min_epoc
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--project', default='ant')
-    ap.add_argument('--seeds', type=int, nargs='+', default=[42, 43, 44])
+    ap.add_argument('--seeds', type=int, nargs='+', default=[42, 43, 44, 45, 46])
     ap.add_argument('--epochs', type=int, default=60)
     ap.add_argument('--patience', type=int, default=15, help='early stopping sur la validation (0 = désactivé)')
     ap.add_argument('--min-epochs', type=int, default=10,

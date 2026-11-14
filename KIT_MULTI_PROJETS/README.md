@@ -14,8 +14,8 @@ Cet ensemble remplace **les données Ant seules** du kit étudiant précédent. 
 pip install -r requirements.txt
 python -m unittest discover -s tests -v          # tests unitaires (modèle + métriques)
 python check_graph_temporal.py                   # contrôle des données
-python run_star.py --project ant --seeds 42 43 44 --tune     # 7 configurations × 3 graines
-python run_star.py --project jedit --seeds 42 43 44 --tune
+python run_star.py --project ant --seeds 42 43 44 45 46 --tune   # 7 configurations × 5 graines
+python run_star.py --project jedit --seeds 42 43 44 45 46 --tune
 ```
 Sur Google Colab : ouvrir `notebooks/PRIORITEST_STAR_Colab.ipynb` (clone le dépôt, lance tout, trace les courbes).
 L'ancien notebook `PRIORITEST_STAR_Ant_Colab.ipynb` attend une archive zip qui n'existe plus : ne plus l'utiliser.
