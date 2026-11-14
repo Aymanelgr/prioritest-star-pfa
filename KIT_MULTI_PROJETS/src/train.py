@@ -30,6 +30,26 @@ def effort_aware_stats(scores,y,loc):
     d=stats(s/loc,y,loc)
     return {'EA_Recall@20pct_LOC':d['Recall@20pct_LOC'],'EA_classes_in_budget':d['classes_in_budget']}
 
+def choose_flag_rate(scores,y):
+    """Règle de décision réglée sur la VALIDATION : fraction q des classes à signaler (les q·N mieux classées)
+    qui maximise l'accuracy. Une fraction (plutôt qu'un seuil brut) reste valable si l'échelle des scores change
+    (ex. modèle réentraîné sur train+validation)."""
+    s=np.asarray(scores,dtype=float);y=np.asarray(y).astype(int);n=len(s)
+    order=np.argsort(-s,kind='stable');cum=np.concatenate([[0],np.cumsum(y[order])]);P=y.sum()
+    acc=(cum+(n-np.arange(n+1)-(P-cum)))/n          # accuracy si on signale les k premières, k=0..n
+    return float(np.argmax(acc)/n)
+
+def classification_stats(scores,y,rate):
+    """Accuracy, balanced accuracy, MCC, F1… en signalant la fraction `rate` des classes les plus risquées."""
+    from sklearn.metrics import accuracy_score,balanced_accuracy_score,matthews_corrcoef,f1_score,precision_score,recall_score
+    s=np.asarray(scores,dtype=float);y=np.asarray(y).astype(int);n=len(s)
+    pred=np.zeros(n,dtype=int);pred[np.argsort(-s,kind='stable')[:int(round(rate*n))]]=1
+    r=lambda v:round(float(v),4)
+    return {'Accuracy':r(accuracy_score(y,pred)),'Balanced_accuracy':r(balanced_accuracy_score(y,pred)),
+            'MCC':r(matthews_corrcoef(y,pred)),'F1':r(f1_score(y,pred,zero_division=0)),
+            'Precision':r(precision_score(y,pred,zero_division=0)),'Recall':r(recall_score(y,pred,zero_division=0)),
+            'flag_rate':r(rate),'Majority_accuracy':r(max(y.mean(),1-y.mean()))}
+
 def run(data='data',out='results',epochs=60,seed=42,device='cpu'):
     random.seed(seed);np.random.seed(seed);torch.manual_seed(seed)
     torch.set_num_threads(min(4,torch.get_num_threads()))

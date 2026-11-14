@@ -6,7 +6,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'src'))
-from train import stats, effort_aware_stats  # noqa: E402
+from train import stats, effort_aware_stats, choose_flag_rate, classification_stats  # noqa: E402
 
 
 class TestStats(unittest.TestCase):
@@ -49,6 +49,30 @@ class TestEffortAware(unittest.TestCase):
     def test_zero_loc_safe(self):
         r = effort_aware_stats(np.array([.5, .4]), np.array([1, 0]), np.array([0, 0]))
         self.assertTrue(np.isfinite(r['EA_Recall@20pct_LOC']))
+
+
+class TestDecisionRule(unittest.TestCase):
+    def test_flag_rate_perfect_scores(self):
+        y = np.array([1, 1, 0, 0, 0])
+        s = np.array([.9, .8, .3, .2, .1])
+        self.assertAlmostEqual(choose_flag_rate(s, y), 0.4)
+        r = classification_stats(s, y, 0.4)
+        self.assertEqual(r['Accuracy'], 1.0)
+        self.assertEqual(r['MCC'], 1.0)
+        self.assertEqual(r['Majority_accuracy'], 0.6)
+
+    def test_flag_rate_zero_when_scores_useless(self):
+        y = np.array([0, 0, 0, 1])
+        s = np.array([.9, .8, .7, .1])          # le défaut est classé en dernier
+        self.assertEqual(choose_flag_rate(s, y), 0.0)  # mieux vaut ne rien signaler
+        self.assertEqual(classification_stats(s, y, 0.0)['Accuracy'], 0.75)
+
+    def test_rate_transfers_to_other_scale(self):
+        y = np.array([1, 0, 1, 0, 0, 0])
+        s = np.array([.9, .1, .8, .2, .3, .05])
+        r1 = classification_stats(s, y, 1 / 3)
+        r2 = classification_stats(s * 100 - 7, y, 1 / 3)   # même ordre, autre échelle -> mêmes métriques
+        self.assertEqual(r1, r2)
 
 
 if __name__ == '__main__':
