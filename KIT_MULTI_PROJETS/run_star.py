@@ -72,8 +72,13 @@ def score_of(out, cfg):
     return torch.sigmoid(out['rank'] if cfg['lambda_r'] else out['logits'])
 
 
-def train_variant(cfg, hp, data, tr, val, epochs, patience, device):
-    """Entraîne une variante neuronale (batch complet = toutes les classes de la version d'entraînement)."""
+def train_variant(cfg, hp, data, tr, val, epochs, patience, device, min_epochs=10):
+    """Entraîne une variante neuronale (batch complet = toutes les classes de la version d'entraînement).
+
+    min_epochs : aucune sélection de checkpoint ni arrêt anticipé avant cette époque. Sans ce plancher, une AP de
+    validation bruitée peut retenir un modèle quasi non entraîné (époque 1), ce qui rend les ablations instables.
+    """
+    min_epochs = max(1, min(min_epochs, epochs))
     net = CrossViewSTAR(data[tr]['x'].shape[-1], use_graph=cfg['use_graph'], similarity_gate=cfg['similarity_gate'],
                         use_delta=cfg.get('use_delta', False), bidirectional=cfg.get('bidirectional', False),
                         dropout=cfg.get('dropout', 0.)).to(device)
@@ -99,7 +104,7 @@ def train_variant(cfg, hp, data, tr, val, epochs, patience, device):
         loss.backward()
         torch.nn.utils.clip_grad_norm_(net.parameters(), 5.0)
         opt.step()
-        if val is None:
+        if val is None or ep < min_epochs:
             continue
         net.eval()
         with torch.no_grad():
@@ -136,7 +141,7 @@ def export_scores(path, split, d, scores, out=None):
                         round(density, 6), alpha, beta, agr])
 
 
-def tune(project, data, tr, val, epochs, patience, device, seed, names):
+def tune(project, data, tr, val, epochs, patience, device, seed, names, min_epochs=10):
     """Recherche en grille sur la VALIDATION uniquement (jamais sur le test)."""
     chosen = {}
     for name in names:
@@ -150,7 +155,7 @@ def tune(project, data, tr, val, epochs, patience, device, seed, names):
             c = {**cfg, **{k: v for k, v in p.items() if k.startswith('lambda')}}
             hp = {**DEFAULT_HP, **{k: v for k, v in p.items() if k == 'temperature'}}
             set_seed(seed)
-            _, _, ap = train_variant(c, hp, data, tr, val, epochs, patience, device)
+            _, _, ap = train_variant(c, hp, data, tr, val, epochs, patience, device, min_epochs)
             print(f'  [tune] {name} {p} -> AP_val={ap:.4f}', flush=True)
             if ap > best[0]:
                 best = (ap, p)
@@ -165,6 +170,8 @@ def main():
     ap.add_argument('--seeds', type=int, nargs='+', default=[42, 43, 44])
     ap.add_argument('--epochs', type=int, default=60)
     ap.add_argument('--patience', type=int, default=15, help='early stopping sur la validation (0 = désactivé)')
+    ap.add_argument('--min-epochs', type=int, default=10,
+                    help='aucune sélection de checkpoint / arrêt anticipé avant cette époque')
     ap.add_argument('--variants', nargs='+', default=list(VARIANTS), choices=list(VARIANTS))
     ap.add_argument('--tune', action='store_true', help='grille lambda_c / lambda_r / température sur la validation')
     ap.add_argument('--out', default=str(ROOT / 'results'))
@@ -187,7 +194,8 @@ def main():
         if val is None:
             print('!! --tune ignoré : pas de version de validation (2 fenêtres). Hyperparamètres par défaut.')
         else:
-            tuned = tune(args.project, data, tr, val, args.epochs, args.patience, args.device, args.seeds[0], args.variants)
+            tuned = tune(args.project, data, tr, val, args.epochs, args.patience, args.device, args.seeds[0],
+                         args.variants, args.min_epochs)
             (out_dir / 'tuning.json').write_text(json.dumps(tuned, indent=2), encoding='utf-8')
 
     rows = []
@@ -197,6 +205,7 @@ def main():
         for f in sdir.glob('*_scores.csv'):
             f.unlink()
         result = {'project': args.project, 'train': tr, 'validation': val, 'test': te, 'seed': seed,
+                  'epochs': args.epochs, 'min_epochs': args.min_epochs, 'patience': args.patience,
                   'caveat': 'Current-version defect detection, NOT next-version forecasting', 'variants': {}}
         for name in args.variants:
             set_seed(seed)
@@ -216,7 +225,8 @@ def main():
                 p = tuned.get(name, {}).get('params') or {}
                 c = {**cfg, **{k: v for k, v in p.items() if k.startswith('lambda')}}
                 hp = {**DEFAULT_HP, **{k: v for k, v in p.items() if k == 'temperature'}}
-                net, best_ep, _ = train_variant(c, hp, data, tr, val, args.epochs, args.patience, args.device)
+                net, best_ep, _ = train_variant(c, hp, data, tr, val, args.epochs, args.patience, args.device,
+                                                args.min_epochs)
                 entry = {'selected_epoch': best_ep, 'parameters': sum(x.numel() for x in net.parameters()),
                          'lambda_c': c['lambda_c'], 'lambda_r': c['lambda_r'], 'temperature': hp['temperature']}
                 for split, v in splits:
