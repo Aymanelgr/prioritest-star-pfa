@@ -22,6 +22,14 @@ def stats(scores,y,loc):
             'Recall@20pct_classes':round(float(y[ix[:max(1,int(np.ceil(.2*len(y))))]].sum()/max(1,y.sum())),4),
             'Recall@20pct_LOC':round(float(y[chosen].sum()/max(1,y.sum())),4),'classes_in_budget':len(chosen)}
 
+def effort_aware_stats(scores,y,loc):
+    """Classement sensible à l'effort : tri par densité de risque = score / LOC.
+    À budget LOC fixé, inspecter d'abord les classes au plus fort risque PAR LIGNE maximise les défauts trouvés
+    (principe des modèles effort-aware, ex. Kamei et al. 2013, Mende & Koschke 2010)."""
+    s=np.asarray(scores,dtype=float);loc=np.maximum(np.asarray(loc,dtype=float),1)
+    d=stats(s/loc,y,loc)
+    return {'EA_Recall@20pct_LOC':d['Recall@20pct_LOC'],'EA_classes_in_budget':d['classes_in_budget']}
+
 def run(data='data',out='results',epochs=60,seed=42,device='cpu'):
     random.seed(seed);np.random.seed(seed);torch.manual_seed(seed)
     torch.set_num_threads(min(4,torch.get_num_threads()))

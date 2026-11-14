@@ -24,7 +24,13 @@ Configurations de `run_star.py` (chacune ajoute un seul mécanisme) :
 A1 boosting · A2 TCN+BCE · A3 +graphe/fusion classique · A4 +fusion guidée par similarité · A5 +InfoNCE ·
 A6 +RankNet = STAR complet · A7 STAR+ (Δ-métriques, GraphSAGE bidirectionnel, InfoNCE sans faux négatifs défaut/défaut,
 RankNet pondéré par le LOC, dropout + LayerNorm). Sorties : `results/<projet>/summary.csv`, `seed<k>/metrics.json`,
-`seed<k>/<variante>_scores.csv` (score, α, β, cos(zT,zS) par classe), checkpoints `.pt`.
+`seed<k>/<variante>_scores.csv` (score, risque/kLOC, α, β, cos(zT,zS) par classe), checkpoints `.pt`.
+
+**Évaluation sensible à l'effort** : en plus du tri par risque, chaque modèle est évalué en triant les classes par
+densité de risque `score / LOC` (`EA_Recall@20pct_LOC`). Le risque étant corrélé à la taille, le tri par risque seul
+inspecte d'abord les grosses classes et épuise le budget ; la densité maximise les défauts trouvés à budget LOC fixé
+(modèles effort-aware : Mende & Koschke 2010 ; Kamei et al. 2013). Le score du modèle n'est pas modifié : seul
+l'ordre d'inspection change, aucun paramètre n'est réglé sur le test.
 
 ## Exécution (lanceur initial, 4 variantes)
 ```bash

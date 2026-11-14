@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / 'src'))
 from model import (CrossViewSTAR, cross_view_infonce, label_aware_infonce,  # noqa: E402
                    pairwise_rank_loss, effort_aware_rank_loss)
-from train import load, stats  # noqa: E402
+from train import load, stats, effort_aware_stats  # noqa: E402
 
 # Chaque ligne ajoute UN mécanisme à la précédente (A1..A6), A7 = améliorations proposées.
 VARIANTS = {
@@ -123,14 +123,17 @@ def export_scores(path, split, d, scores, out=None):
     with path.open('a', newline='', encoding='utf-8') as f:
         w = csv.writer(f)
         if new:
-            w.writerow(['split', 'class_id', 'label', 'loc', 'score', 'alpha_temporal', 'beta_structural', 'agreement_cos'])
+            w.writerow(['split', 'class_id', 'label', 'loc', 'score', 'risk_per_kloc',
+                        'alpha_temporal', 'beta_structural', 'agreement_cos'])
         y = d['y'].cpu().numpy()
         for i in range(len(y)):
             alpha = beta = agr = ''
             if out is not None:
                 alpha = round(float(out['gate'][i, 0]), 5); beta = round(float(out['gate'][i, 1]), 5)
                 agr = round(float(out['agreement'][i]), 5)
-            w.writerow([split, d['ids'][i], int(y[i]), float(d['loc'][i]), round(float(scores[i]), 6), alpha, beta, agr])
+            density = 1000 * float(scores[i]) / max(float(d['loc'][i]), 1.)
+            w.writerow([split, d['ids'][i], int(y[i]), float(d['loc'][i]), round(float(scores[i]), 6),
+                        round(density, 6), alpha, beta, agr])
 
 
 def tune(project, data, tr, val, epochs, patience, device, seed, names):
@@ -207,6 +210,7 @@ def main():
                 for split, v in splits:
                     s = hgb.predict_proba(data[v]['x'][:, -1].cpu().numpy())[:, 1]
                     entry[split] = stats(s, data[v]['y'].cpu().numpy(), data[v]['loc'])
+                    entry[split].update(effort_aware_stats(s, data[v]['y'].cpu().numpy(), data[v]['loc']))
                     export_scores(sdir / f'{name}_scores.csv', split, data[v], s)
             else:
                 p = tuned.get(name, {}).get('params') or {}
@@ -220,6 +224,7 @@ def main():
                         o = net(data[v]['x'], data[v]['edges'])
                         s = score_of(o, c).cpu().numpy()
                     entry[split] = stats(s, data[v]['y'].cpu().numpy(), data[v]['loc'])
+                    entry[split].update(effort_aware_stats(s, data[v]['y'].cpu().numpy(), data[v]['loc']))
                     entry[split]['mean_alpha_temporal'] = round(float(o['gate'][:, 0].mean()), 4)
                     entry[split]['mean_agreement'] = round(float(o['agreement'].mean()), 4)
                     export_scores(sdir / f'{name}_scores.csv', split, data[v], s, o)
@@ -228,14 +233,16 @@ def main():
             entry['training_seconds'] = round(time.time() - t0, 2)
             result['variants'][name] = entry
             print(f'[seed {seed}] {name:30s} test AP={entry["test"]["AP"]:.4f} '
-                  f'R@20%LOC={entry["test"]["Recall@20pct_LOC"]:.4f} ({entry["training_seconds"]}s)', flush=True)
+                  f'R@20%LOC={entry["test"]["Recall@20pct_LOC"]:.4f} '
+                  f'R@20%LOC(risque/LOC)={entry["test"]["EA_Recall@20pct_LOC"]:.4f} ({entry["training_seconds"]}s)', flush=True)
             rows.append({'variant': name, 'seed': seed, **{f'test_{k}': v for k, v in entry['test'].items()},
                          **({f'val_{k}': v for k, v in entry['validation'].items()} if 'validation' in entry else {}),
                          'training_seconds': entry['training_seconds']})
         (sdir / 'metrics.json').write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding='utf-8')
 
     # Résumé moyenne ± écart-type
-    metrics = ['test_AP', 'test_ROC_AUC', 'test_Recall@20pct_classes', 'test_Recall@20pct_LOC', 'val_AP', 'training_seconds']
+    metrics = ['test_AP', 'test_ROC_AUC', 'test_Recall@20pct_classes', 'test_Recall@20pct_LOC',
+               'test_EA_Recall@20pct_LOC', 'val_AP', 'val_EA_Recall@20pct_LOC', 'training_seconds']
     summary = []
     for name in args.variants:
         r = [x for x in rows if x['variant'] == name]
@@ -252,7 +259,9 @@ def main():
     print('\n=== Résumé (test, moyenne ± écart-type sur', len(args.seeds), 'graines) ===')
     for s in summary:
         print(f"{s['variant']:30s} AP={s.get('test_AP_mean', 0):.4f}±{s.get('test_AP_std', 0):.4f}  "
-              f"R@20%LOC={s.get('test_Recall@20pct_LOC_mean', 0):.4f}±{s.get('test_Recall@20pct_LOC_std', 0):.4f}")
+              f"R@20%LOC={s.get('test_Recall@20pct_LOC_mean', 0):.4f}±{s.get('test_Recall@20pct_LOC_std', 0):.4f}  "
+              f"R@20%LOC(risque/LOC)={s.get('test_EA_Recall@20pct_LOC_mean', 0):.4f}"
+              f"±{s.get('test_EA_Recall@20pct_LOC_std', 0):.4f}")
     print('Fichiers :', out_dir)
 
 
