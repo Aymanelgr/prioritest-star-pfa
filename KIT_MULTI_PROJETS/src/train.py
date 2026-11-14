@@ -26,7 +26,10 @@ def run(data='data',out='results',epochs=60,seed=42,device='cpu'):
     random.seed(seed);np.random.seed(seed);torch.manual_seed(seed)
     torch.set_num_threads(min(4,torch.get_num_threads()))
     output=Path(out);output.mkdir(parents=True,exist_ok=True)
-    cohorts={v:load(Path(data)/f'ant-{v}.npz',device) for v in ('1.5','1.6','1.7')}
+    data=Path(data)
+    if not (data/'ant-1.5.npz').exists() and (data/'ant'/'ant-1.5.npz').exists():
+        data=data/'ant'  # organisation multi-projets : data/<projet>/<projet>-<version>.npz
+    cohorts={v:load(data/f'ant-{v}.npz',device) for v in ('1.5','1.6','1.7')}
     result={'protocol':'ANT within-target-version defect detection; NOT next-version prospective forecast', 'seed':seed,'epochs':epochs,'models':{}}
     baseline=HistGradientBoostingClassifier(max_iter=80,max_leaf_nodes=7,learning_rate=.05,random_state=seed)
     baseline.fit(cohorts['1.5']['x'][:,-1].cpu().numpy(),cohorts['1.5']['y'].cpu().numpy())
@@ -60,5 +63,6 @@ def run(data='data',out='results',epochs=60,seed=42,device='cpu'):
     (output/'metrics.json').write_text(json.dumps(result,ensure_ascii=False,indent=2));return result
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--data',default='data');p.add_argument('--out',default='results');p.add_argument('--epochs',type=int,default=60);p.add_argument('--seed',type=int,default=42);p.add_argument('--device',default='cuda' if torch.cuda.is_available() else 'cpu');args=p.parse_args()
+    ROOT=Path(__file__).resolve().parent.parent
+    p=argparse.ArgumentParser();p.add_argument('--data',default=str(ROOT/'data'));p.add_argument('--out',default=str(ROOT/'results'));p.add_argument('--epochs',type=int,default=60);p.add_argument('--seed',type=int,default=42);p.add_argument('--device',default='cuda' if torch.cuda.is_available() else 'cpu');args=p.parse_args()
     run(args.data,args.out,args.epochs,args.seed,args.device)

@@ -9,7 +9,24 @@ Cet ensemble remplace **les données Ant seules** du kit étudiant précédent. 
 - **Ivy** : aucune classe commune sur trois versions selon l'appariement strict exact (non préparé).
 - **PBeans** : deux versions originales, insuffisantes pour la fenêtre imposée de trois (non préparé).
 
-## Exécution
+## Démarrage rapide (recommandé)
+```bash
+pip install -r requirements.txt
+python -m unittest discover -s tests -v          # tests unitaires (modèle + métriques)
+python check_graph_temporal.py                   # contrôle des données
+python run_star.py --project ant --seeds 42 43 44 --tune     # 7 configurations × 3 graines
+python run_star.py --project jedit --seeds 42 43 44 --tune
+```
+Sur Google Colab : ouvrir `notebooks/PRIORITEST_STAR_Colab.ipynb` (clone le dépôt, lance tout, trace les courbes).
+L'ancien notebook `PRIORITEST_STAR_Ant_Colab.ipynb` attend une archive zip qui n'existe plus : ne plus l'utiliser.
+
+Configurations de `run_star.py` (chacune ajoute un seul mécanisme) :
+A1 boosting · A2 TCN+BCE · A3 +graphe/fusion classique · A4 +fusion guidée par similarité · A5 +InfoNCE ·
+A6 +RankNet = STAR complet · A7 STAR+ (Δ-métriques, GraphSAGE bidirectionnel, InfoNCE sans faux négatifs défaut/défaut,
+RankNet pondéré par le LOC, dropout + LayerNorm). Sorties : `results/<projet>/summary.csv`, `seed<k>/metrics.json`,
+`seed<k>/<variante>_scores.csv` (score, α, β, cos(zT,zS) par classe), checkpoints `.pt`.
+
+## Exécution (lanceur initial, 4 variantes)
 ```bash
 pip install -r requirements.txt
 python run_project.py --project jedit --epochs 35 --seed 42
