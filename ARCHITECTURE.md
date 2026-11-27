@@ -43,7 +43,7 @@ v1 (27 Nov) planned Phases 0–8. Phases 0–4 have since been executed; v2 rewr
 | Ablation ladder A1–A8, STAR-R final model, validation search | `run_star.py`, `explore_val.py`, `train_final.py` |
 | Phase 1 fair comparison, Phase 2 STAR-E, Phase 3 cross-project, Phase 4 improvements | `compare_fair.py`, `effort_star.py`, `more_data.py`, `improve_star.py` |
 | Analysis figures, Streamlit app, LaTeX report draft | `analyse_star.py`, `app.py`, `rapport/` |
-| 30 unit tests | `tests/` |
+| 34 unit tests (incl. 4 no-leakage tests) | `tests/` |
 
 ### 1.2 What the experiments showed (Ant: train 1.5 → val 1.6 → test 1.7)
 
@@ -119,7 +119,7 @@ prioritest-star/
     ├── transfer_study.py (6.3, done) · domain_adapt.py (5.2) · final_model.py (6.1)
     ├── analyse_star.py · app.py
     ├── PHASE{1..4}_RESULTS.md · TRANSFER_RESULTS.md · RESULTS_STAR_R.md
-    ├── tests/                     ← 30 tests (+ leakage tests, 6.4)
+    ├── tests/                     ← 34 tests, incl. no-leakage tests
     ├── notebooks/PRIORITEST_STAR_Colab.ipynb
     └── results/                   ← committed; every number in the report comes from here
 ```
@@ -168,7 +168,7 @@ Ordered by **expected value for the defence**. Each step lists the goal, what to
   - **POI** 2.5 → 3.0.
   - **JEdit** is reported with its bootstrap CI and the 5-positive caveat.
   - **Done when** the claims "STAR ≈ LR", "trees win Popt" and "STAR robust to mixing" are checked on ≥ 2 projects.
-- [ ] **6.4 Leakage tests** (`tests/test_no_leakage.py`):
+- [x] **6.4 Leakage tests** *(done: 4 tests, all pass)* (`tests/test_no_leakage.py`):
   - the search code never opens the test file (monkeypatch `np.load`);
   - normalisation statistics come from window 1 only;
   - the flag rate and the blend are computed from validation scores only.
@@ -177,7 +177,7 @@ Ordered by **expected value for the defence**. Each step lists the goal, what to
 
 - [ ] 7.1 Budget–recall curves with CI bands for: LR, RF, STAR A5, the blend, and the random and oracle orderings.
 - [ ] 7.2 α / β and cos(zT, zS), with and without gate entropy, broken down by defective vs clean, correct vs wrong, unstable (large |Δ|) vs highly coupled (high CBO / in-degree).
-- [ ] 7.3 **Key analysis after 6.3:** performance by node-degree bucket (isolated, low, high) **per project**, plus graph statistics (density, coverage, defect assortativity: do defective classes import defective classes?). This explains why the graph helps on Camel and not on Ant or POI.
+- [x] 7.3 *(done: `python graph_analysis.py`, see `GRAPH_ANALYSIS.md`. On Camel isolated classes are 1.3 % defective vs 26 % connected (×20), and the whole graph gain is on connected classes; there is no defect homophily, so the signal is connectivity)* **Key analysis after 6.3:** performance by node-degree bucket (isolated, low, high) **per project**, plus graph statistics (density, coverage, defect assortativity: do defective classes import defective classes?). This explains why the graph helps on Camel and not on Ant or POI.
 - [ ] 7.4 Error analysis plus SHAP on RF/LR: false positives are large coupled classes; missed defects are small, bland classes.
 - [ ] 7.5 `app.py`:
   - selectors for project and model (LR, RF, STAR, blend) and for risk vs density ordering, plus a LOC budget slider;
@@ -211,7 +211,7 @@ Ordered by **expected value for the defence**. Each step lists the goal, what to
 |---|---|---|
 | W1 (done) | Phases 0–4 | Data, baselines, STAR, ablations, protocol without leakage |
 | W2 | 5.1, 5.2, 5.4, 5.5 | Experiments that can change the conclusions |
-| W3 | 5.3 (if archive), 5.5, 6.1, 6.2, 6.4 (6.3 done) | Robust, multi-project claims |
+| W3 | 5.3 (if archive), 5.5, 6.1, 6.2 (6.3, 6.4, 7.3 done) | Robust, multi-project claims |
 | W4 | 7, 8.1–8.2 | Explorable Top-k, figures, reproducibility |
 | W5 | 8.3–8.4 | Report and defence |
 
@@ -219,7 +219,7 @@ Ordered by **expected value for the defence**. Each step lists the goal, what to
 
 ## 6. Pushing to GitHub
 
-The repo is `mohamedaoui/prioritest-star`. For Claude to push, the **Claude GitHub App must be installed on the `mohamedaoui` account** (https://github.com/apps/claude/installations/select_target). Otherwise, run this from `C:\Users\ayman\OneDrive\Desktop\prioritest-star-main` in PowerShell:
+The project lives at **https://github.com/Aymanelgr/prioritest-star-pfa** (private), which Claude can push to. The original team repo is `mohamedaoui/prioritest-star`. To update it from `C:\Users\ayman\OneDrive\Desktop\prioritest-star-main`, run in PowerShell:
 
 ```powershell
 git init -b main

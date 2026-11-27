@@ -1,0 +1,151 @@
+{
+ "ant": {
+  "test": "1.7",
+  "graph": {
+   "classes": 292,
+   "defect_rate": 0.349,
+   "import_edges": 867,
+   "mean_degree": 5.94,
+   "isolated_share": 0.127,
+   "defect_rate_isolated": 0.216,
+   "defect_rate_connected": 0.369,
+   "neighbour_defect_rate_of_defective": 0.48,
+   "neighbour_defect_rate_of_clean": 0.451,
+   "homophily_gap": 0.03,
+   "label_assortativity": 0.006
+  },
+  "AP_by_degree": {
+   "all": {
+    "n": 292,
+    "defective": 102,
+    "AP_A2_no_graph": 0.8018,
+    "AP_A3_graph": 0.8034,
+    "gain_from_graph": 0.0016
+   },
+   "isolated": {
+    "n": 37,
+    "defective": 8,
+    "AP_A2_no_graph": 0.5975,
+    "AP_A3_graph": 0.603,
+    "gain_from_graph": 0.0055
+   },
+   "connected": {
+    "n": 255,
+    "defective": 94,
+    "AP_A2_no_graph": 0.8201,
+    "AP_A3_graph": 0.8213,
+    "gain_from_graph": 0.0012
+   }
+  }
+ },
+ "camel": {
+  "test": "1.6",
+  "graph": {
+   "classes": 565,
+   "defect_rate": 0.225,
+   "import_edges": 1608,
+   "mean_degree": 5.69,
+   "isolated_share": 0.142,
+   "defect_rate_isolated": 0.013,
+   "defect_rate_connected": 0.26,
+   "neighbour_defect_rate_of_defective": 0.461,
+   "neighbour_defect_rate_of_clean": 0.474,
+   "homophily_gap": -0.014,
+   "label_assortativity": 0.002
+  },
+  "AP_by_degree": {
+   "all": {
+    "n": 565,
+    "defective": 127,
+    "AP_A2_no_graph": 0.4391,
+    "AP_A3_graph": 0.4817,
+    "gain_from_graph": 0.0427
+   },
+   "isolated": {
+    "n": 80,
+    "defective": 1,
+    "AP_A2_no_graph": 0.0164,
+    "AP_A3_graph": 0.0154,
+    "gain_from_graph": -0.001
+   },
+   "connected": {
+    "n": 485,
+    "defective": 126,
+    "AP_A2_no_graph": 0.4559,
+    "AP_A3_graph": 0.5082,
+    "gain_from_graph": 0.0523
+   }
+  }
+ },
+ "poi": {
+  "test": "3.0",
+  "graph": {
+   "classes": 311,
+   "defect_rate": 0.65,
+   "import_edges": 472,
+   "mean_degree": 3.04,
+   "isolated_share": 0.254,
+   "defect_rate_isolated": 0.557,
+   "defect_rate_connected": 0.681,
+   "neighbour_defect_rate_of_defective": 0.871,
+   "neighbour_defect_rate_of_clean": 0.751,
+   "homophily_gap": 0.12,
+   "label_assortativity": 0.09
+  },
+  "AP_by_degree": {
+   "all": {
+    "n": 311,
+    "defective": 202,
+    "AP_A2_no_graph": 0.8784,
+    "AP_A3_graph": 0.7297,
+    "gain_from_graph": -0.1487
+   },
+   "isolated": {
+    "n": 79,
+    "defective": 44,
+    "AP_A2_no_graph": 0.9625,
+    "AP_A3_graph": 0.9621,
+    "gain_from_graph": -0.0004
+   },
+   "connected": {
+    "n": 232,
+    "defective": 158,
+    "AP_A2_no_graph": 0.857,
+    "AP_A3_graph": 0.7045,
+    "gain_from_graph": -0.1525
+   }
+  }
+ },
+ "jedit": {
+  "test": "4.3",
+  "graph": {
+   "classes": 179,
+   "defect_rate": 0.028,
+   "import_edges": 233,
+   "mean_degree": 2.6,
+   "isolated_share": 0.263,
+   "defect_rate_isolated": 0.0,
+   "defect_rate_connected": 0.038,
+   "neighbour_defect_rate_of_defective": 0.048,
+   "neighbour_defect_rate_of_clean": 0.163,
+   "homophily_gap": -0.116,
+   "label_assortativity": -0.089
+  },
+  "AP_by_degree": {
+   "all": {
+    "n": 179,
+    "defective": 5,
+    "AP_A2_no_graph": 0.2574,
+    "AP_A3_graph": 0.2733,
+    "gain_from_graph": 0.0159
+   },
+   "connected": {
+    "n": 132,
+    "defective": 5,
+    "AP_A2_no_graph": 0.2611,
+    "AP_A3_graph": 0.2741,
+    "gain_from_graph": 0.013
+   }
+  }
+ }
+}
