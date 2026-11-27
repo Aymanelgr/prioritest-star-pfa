@@ -51,7 +51,7 @@ class MeanSAGE(nn.Module):
 
 class CrossViewSTAR(nn.Module):
     def __init__(self, n_features, d=32, use_graph=True, similarity_gate=True,
-                 use_delta=False, bidirectional=False, dropout=0.0):
+                 use_delta=False, bidirectional=False, dropout=0.0, gate_absdiff=False):
         super().__init__()
         self.use_graph = use_graph
         self.similarity_gate = similarity_gate
@@ -67,7 +67,9 @@ class CrossViewSTAR(nn.Module):
         self.norm_t = nn.LayerNorm(d) if dropout > 0 else nn.Identity()
         self.norm_s = nn.LayerNorm(d) if dropout > 0 else nn.Identity()
         self.drop = nn.Dropout(dropout) if dropout > 0 else nn.Identity()
-        self.gate = nn.Sequential(nn.Linear(2 * d + (1 if similarity_gate else 0), d), nn.ReLU(), nn.Linear(d, 2))
+        self.gate_absdiff = gate_absdiff   # Phase 4: the gate also sees |zT − zS| (where the views disagree)
+        self.gate = nn.Sequential(nn.Linear(2 * d + (1 if similarity_gate else 0) + (d if gate_absdiff else 0), d),
+                                  nn.ReLU(), nn.Linear(d, 2))
         self.risk = nn.Linear(d, 1)
         self.rank = nn.Linear(d, 1)
 
@@ -92,6 +94,8 @@ class CrossViewSTAR(nn.Module):
             agreement = F.cosine_similarity(temporal, structural, dim=1).unsqueeze(1)
             feats = torch.cat([temporal, structural, agreement], dim=1) if self.similarity_gate \
                 else torch.cat([temporal, structural], dim=1)
+            if self.gate_absdiff:
+                feats = torch.cat([feats, (temporal - structural).abs()], dim=1)
             gate = torch.softmax(self.gate(feats), dim=1)
             combined = gate[:, 0:1] * temporal + gate[:, 1:2] * structural
         else:  # ablation TCN seul : pas de vue structurelle, pas de fusion
@@ -172,3 +176,31 @@ def effort_aware_rank_loss(scores, labels, loc, max_pairs=3000, strength=1.0):
     w = 1 + strength * (logl[j] - logl[i]).clamp_min(0)
     w = w / w.mean()
     return (w * F.softplus(-(scores[i] - scores[j]))).mean()
+
+
+def supcon_cross_view(temporal, structural, labels, temperature=0.2, sup_weight=0.5):
+    """Phase 4 — cross-view InfoNCE / supervised-contrastive hybrid.
+
+    Anchor zT_i, candidates zS_j. Positives: j = i (weight 1) and every other defective j when i is defective
+    (weight sup_weight, split across them). Same-label clean pairs are neither pulled nor pushed (removed from the
+    denominator), so the false negatives of plain InfoNCE disappear and defective classes form one cluster.
+    Symmetric over the two views.
+    """
+    if temporal.shape[0] < 2:
+        return temporal.sum() * 0
+    u = F.normalize(temporal, dim=1); v = F.normalize(structural, dim=1)
+    y = labels.view(-1) > .5; n = len(u); eye = torch.eye(n, dtype=torch.bool, device=u.device)
+    same_clean = (~y).unsqueeze(0) & (~y).unsqueeze(1) & ~eye
+    sup = y.unsqueeze(0) & y.unsqueeze(1) & ~eye
+    target = eye.float() + sup_weight * sup.float() / sup.sum(1, keepdim=True).clamp_min(1)
+    target = target / target.sum(1, keepdim=True)
+
+    def side(a, b):
+        logits = (a @ b.T / temperature).masked_fill(same_clean, float('-inf'))
+        return -(target * F.log_softmax(logits, dim=1).masked_fill(same_clean, 0)).sum(1).mean()
+    return (side(u, v) + side(v, u)) / 2
+
+
+def gate_entropy(gate):
+    """Mean entropy of the fusion weights (α, β). Maximising it keeps both views in use."""
+    return -(gate * gate.clamp_min(1e-8).log()).sum(1).mean()

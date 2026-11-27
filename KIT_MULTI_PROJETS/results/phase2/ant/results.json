@@ -1,0 +1,415 @@
+{
+ "project": "ant",
+ "test": "1.7",
+ "per_seed_mean_std": {
+  "E1_fixed_gamma": {
+   "Popt": [
+    0.7108,
+    0.0006
+   ],
+   "R@20LOC": [
+    0.302,
+    0.0041
+   ],
+   "IFA": [
+    27.2,
+    0.6325
+   ],
+   "AP_detection_head": [
+    0.7794,
+    0.0135
+   ],
+   "gamma": [
+    1.0,
+    0.0
+   ],
+   "per_seed_Popt": [
+    0.7098,
+    0.7112,
+    0.711,
+    0.7099,
+    0.7115,
+    0.7101,
+    0.7116,
+    0.7109,
+    0.711,
+    0.7108
+   ]
+  },
+  "E2_learned_gamma": {
+   "Popt": [
+    0.7108,
+    0.0007
+   ],
+   "R@20LOC": [
+    0.302,
+    0.0041
+   ],
+   "IFA": [
+    27.2,
+    0.6325
+   ],
+   "AP_detection_head": [
+    0.7794,
+    0.0135
+   ],
+   "gamma": [
+    0.984,
+    0.0
+   ],
+   "per_seed_Popt": [
+    0.7098,
+    0.7111,
+    0.711,
+    0.7099,
+    0.7117,
+    0.71,
+    0.7116,
+    0.7111,
+    0.7112,
+    0.7107
+   ]
+  },
+  "E3_learned_gamma_oracle_pairs": {
+   "Popt": [
+    0.7107,
+    0.0007
+   ],
+   "R@20LOC": [
+    0.302,
+    0.0041
+   ],
+   "IFA": [
+    27.2,
+    0.6325
+   ],
+   "AP_detection_head": [
+    0.7792,
+    0.0136
+   ],
+   "gamma": [
+    0.984,
+    0.0
+   ],
+   "per_seed_Popt": [
+    0.7103,
+    0.7111,
+    0.711,
+    0.7101,
+    0.7116,
+    0.7097,
+    0.7116,
+    0.7112,
+    0.711,
+    0.71
+   ]
+  }
+ },
+ "ensemble_table": {
+  "E1_fixed_gamma": {
+   "Popt": 0.7115,
+   "Popt_CI": [
+    0.6465,
+    0.7634
+   ],
+   "R@20LOC": 0.3039,
+   "R@20LOC_CI": [
+    0.2222,
+    0.3684
+   ],
+   "IFA": 28
+  },
+  "E2_learned_gamma": {
+   "Popt": 0.7113,
+   "Popt_CI": [
+    0.6465,
+    0.7633
+   ],
+   "R@20LOC": 0.3039,
+   "R@20LOC_CI": [
+    0.2222,
+    0.37
+   ],
+   "IFA": 28
+  },
+  "E3_learned_gamma_oracle_pairs": {
+   "Popt": 0.7114,
+   "Popt_CI": [
+    0.6464,
+    0.7633
+   ],
+   "R@20LOC": 0.3039,
+   "R@20LOC_CI": [
+    0.2222,
+    0.3684
+   ],
+   "IFA": 28
+  },
+  "B_RF+density": {
+   "Popt": 0.7499,
+   "Popt_CI": [
+    0.6874,
+    0.7956
+   ],
+   "R@20LOC": 0.3627,
+   "R@20LOC_CI": [
+    0.2755,
+    0.4182
+   ],
+   "IFA": 28
+  },
+  "B_ET+density": {
+   "Popt": 0.7379,
+   "Popt_CI": [
+    0.6767,
+    0.7856
+   ],
+   "R@20LOC": 0.3725,
+   "R@20LOC_CI": [
+    0.28,
+    0.4228
+   ],
+   "IFA": 29
+  },
+  "B_LR+density": {
+   "Popt": 0.7137,
+   "Popt_CI": [
+    0.6482,
+    0.766
+   ],
+   "R@20LOC": 0.3235,
+   "R@20LOC_CI": [
+    0.2333,
+    0.3846
+   ],
+   "IFA": 26
+  },
+  "A5_plus_InfoNCE+density": {
+   "Popt": 0.7177,
+   "Popt_CI": [
+    0.6521,
+    0.7688
+   ],
+   "R@20LOC": 0.2941,
+   "R@20LOC_CI": [
+    0.2174,
+    0.3738
+   ],
+   "IFA": 25
+  },
+  "A6_STAR_full+density": {
+   "Popt": 0.7113,
+   "Popt_CI": [
+    0.6444,
+    0.7639
+   ],
+   "R@20LOC": 0.2745,
+   "R@20LOC_CI": [
+    0.2079,
+    0.3619
+   ],
+   "IFA": 25
+  }
+ },
+ "tests": [
+  {
+   "model": "E1_fixed_gamma",
+   "vs": "B_RF+density",
+   "metric": "Popt",
+   "diff": -0.0384,
+   "CI95": [
+    -0.0677,
+    -0.0094
+   ],
+   "p": 0.01
+  },
+  {
+   "model": "E1_fixed_gamma",
+   "vs": "B_RF+density",
+   "metric": "R@20LOC",
+   "diff": -0.0588,
+   "CI95": [
+    -0.1068,
+    0.0108
+   ],
+   "p": 0.139
+  },
+  {
+   "model": "E1_fixed_gamma",
+   "vs": "B_LR+density",
+   "metric": "Popt",
+   "diff": -0.0022,
+   "CI95": [
+    -0.0136,
+    0.0102
+   ],
+   "p": 0.723
+  },
+  {
+   "model": "E1_fixed_gamma",
+   "vs": "B_LR+density",
+   "metric": "R@20LOC",
+   "diff": -0.0196,
+   "CI95": [
+    -0.0561,
+    0.0323
+   ],
+   "p": 0.655
+  },
+  {
+   "model": "E1_fixed_gamma",
+   "vs": "A5_plus_InfoNCE+density",
+   "metric": "Popt",
+   "diff": -0.0062,
+   "CI95": [
+    -0.0322,
+    0.0177
+   ],
+   "p": 0.643
+  },
+  {
+   "model": "E1_fixed_gamma",
+   "vs": "A5_plus_InfoNCE+density",
+   "metric": "R@20LOC",
+   "diff": 0.0098,
+   "CI95": [
+    -0.069,
+    0.0792
+   ],
+   "p": 1.0
+  },
+  {
+   "model": "E2_learned_gamma",
+   "vs": "B_RF+density",
+   "metric": "Popt",
+   "diff": -0.0386,
+   "CI95": [
+    -0.068,
+    -0.0097
+   ],
+   "p": 0.01
+  },
+  {
+   "model": "E2_learned_gamma",
+   "vs": "B_RF+density",
+   "metric": "R@20LOC",
+   "diff": -0.0588,
+   "CI95": [
+    -0.1068,
+    0.0108
+   ],
+   "p": 0.141
+  },
+  {
+   "model": "E2_learned_gamma",
+   "vs": "B_LR+density",
+   "metric": "Popt",
+   "diff": -0.0024,
+   "CI95": [
+    -0.0137,
+    0.01
+   ],
+   "p": 0.7
+  },
+  {
+   "model": "E2_learned_gamma",
+   "vs": "B_LR+density",
+   "metric": "R@20LOC",
+   "diff": -0.0196,
+   "CI95": [
+    -0.0561,
+    0.0323
+   ],
+   "p": 0.659
+  },
+  {
+   "model": "E2_learned_gamma",
+   "vs": "A5_plus_InfoNCE+density",
+   "metric": "Popt",
+   "diff": -0.0064,
+   "CI95": [
+    -0.0322,
+    0.0176
+   ],
+   "p": 0.636
+  },
+  {
+   "model": "E2_learned_gamma",
+   "vs": "A5_plus_InfoNCE+density",
+   "metric": "R@20LOC",
+   "diff": 0.0098,
+   "CI95": [
+    -0.069,
+    0.0792
+   ],
+   "p": 1.0
+  },
+  {
+   "model": "E3_learned_gamma_oracle_pairs",
+   "vs": "B_RF+density",
+   "metric": "Popt",
+   "diff": -0.0385,
+   "CI95": [
+    -0.0677,
+    -0.0095
+   ],
+   "p": 0.009
+  },
+  {
+   "model": "E3_learned_gamma_oracle_pairs",
+   "vs": "B_RF+density",
+   "metric": "R@20LOC",
+   "diff": -0.0588,
+   "CI95": [
+    -0.1071,
+    0.0108
+   ],
+   "p": 0.138
+  },
+  {
+   "model": "E3_learned_gamma_oracle_pairs",
+   "vs": "B_LR+density",
+   "metric": "Popt",
+   "diff": -0.0022,
+   "CI95": [
+    -0.014,
+    0.01
+   ],
+   "p": 0.713
+  },
+  {
+   "model": "E3_learned_gamma_oracle_pairs",
+   "vs": "B_LR+density",
+   "metric": "R@20LOC",
+   "diff": -0.0196,
+   "CI95": [
+    -0.0561,
+    0.0323
+   ],
+   "p": 0.654
+  },
+  {
+   "model": "E3_learned_gamma_oracle_pairs",
+   "vs": "A5_plus_InfoNCE+density",
+   "metric": "Popt",
+   "diff": -0.0063,
+   "CI95": [
+    -0.0323,
+    0.0178
+   ],
+   "p": 0.637
+  },
+  {
+   "model": "E3_learned_gamma_oracle_pairs",
+   "vs": "A5_plus_InfoNCE+density",
+   "metric": "R@20LOC",
+   "diff": 0.0098,
+   "CI95": [
+    -0.069,
+    0.0792
+   ],
+   "p": 1.0
+  }
+ ],
+ "seconds": 243.2
+}

@@ -1,0 +1,56 @@
+{
+ "E1_fixed_gamma": {
+  "cfg": {
+   "use_graph": true,
+   "similarity_gate": true,
+   "lambda_c": 0.0,
+   "lambda_r": 0.25,
+   "use_delta": true
+  },
+  "hp": {
+   "lr": 0.001,
+   "weight_decay": 0.001,
+   "use_delta": true,
+   "lambda_c": 0.0,
+   "lambda_r": 0.25
+  },
+  "epochs": 16,
+  "val_Popt": 0.6867
+ },
+ "E2_learned_gamma": {
+  "cfg": {
+   "use_graph": true,
+   "similarity_gate": true,
+   "lambda_c": 0.0,
+   "lambda_r": 0.25,
+   "use_delta": true
+  },
+  "hp": {
+   "lr": 0.001,
+   "weight_decay": 0.001,
+   "use_delta": true,
+   "lambda_c": 0.0,
+   "lambda_r": 0.25
+  },
+  "epochs": 16,
+  "val_Popt": 0.6866
+ },
+ "E3_learned_gamma_oracle_pairs": {
+  "cfg": {
+   "use_graph": true,
+   "similarity_gate": true,
+   "lambda_c": 0.0,
+   "lambda_r": 0.25,
+   "use_delta": true
+  },
+  "hp": {
+   "lr": 0.001,
+   "weight_decay": 0.0001,
+   "use_delta": true,
+   "lambda_c": 0.0,
+   "lambda_r": 0.25
+  },
+  "epochs": 16,
+  "val_Popt": 0.6866
+ }
+}

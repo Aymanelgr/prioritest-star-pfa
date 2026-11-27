@@ -20,7 +20,7 @@ The preprocessing is the same for all models: train-fitted z-scores, then signed
 
 ## Results on Ant 1.7
 
-AP is the mean ± std over 10 training seeds. The CI is a 2 000-resample class bootstrap of the 10-seed rank ensemble.
+AP is the mean ± std over 10 training seeds. The CI is a 2 000-resample class bootstrap of the 10-seed ensemble. The ensemble averages ranks for rank metrics and averages scores for score / LOC metrics, because dividing a rank by LOC would distort the inspection order.
 "dens" means classes are inspected by score / LOC; "risk" means by raw score.
 
 | Model | AP (seeds) | AP ens. [95 % CI] | Popt (dens) | R@20 % LOC (dens) | Popt (risk) |
@@ -36,7 +36,7 @@ AP is the mean ± std over 10 training seeds. The CI is a 2 000-resample class b
 | Random Forest | **0.809 ± 0.002** | 0.809 [0.725, 0.880] | **0.750** | 0.351 | 0.418 |
 | ExtraTrees | 0.808 ± 0.007 | 0.807 [0.723, 0.878] | 0.738 | **0.363** | 0.399 |
 | kNN cosine (Rhazi-style, N=50) | 0.789 | 0.789 [0.702, 0.864] | 0.710 | 0.294 | 0.413 |
-| STAR + LR + ET blend | 0.806 | 0.806 [0.724, 0.874] | 0.719 | 0.314 | 0.370 |
+| STAR + LR + ET blend | 0.806 | 0.806 [0.724, 0.874] | 0.721 | 0.333 | 0.370 |
 
 Random ordering gives Popt ≈ 0.50 and R@20 % LOC ≈ 0.20.
 
@@ -52,9 +52,16 @@ Random ordering gives Popt ≈ 0.50 and R@20 % LOC ≈ 0.20.
 
 ### Each model against logistic regression (paired class bootstrap)
 
-None of A2–A6, RF, ET, kNN or the STAR blend differs from LR significantly on AP: every 95 % CI contains 0.
-The STAR + LR + ET blend comes closest on Popt (dens): +0.005, CI [−0.000, +0.012], p = 0.06.
-A7 is significantly worse on AP (−0.121, p < 0.001).
+| Model vs LR | ΔAP [95 % CI] | p | ΔPopt (dens) [95 % CI] | p |
+|---|---|---|---|---|
+| A5 + InfoNCE | +0.007 [−0.015, +0.030] | 0.57 | +0.004 [−0.014, +0.023] | 0.67 |
+| A6 STAR | −0.000 [−0.022, +0.022] | 1.00 | −0.002 [−0.013, +0.008] | 0.68 |
+| A7 STAR+ | −0.121 [−0.177, −0.068] | <0.001 | −0.061 [−0.104, −0.019] | 0.009 |
+| Random Forest | +0.011 [−0.024, +0.044] | 0.51 | **+0.036 [+0.011, +0.063]** | **0.007** |
+| ExtraTrees | +0.009 [−0.020, +0.039] | 0.52 | **+0.024 [+0.012, +0.038]** | **<0.001** |
+| STAR + LR + ET blend | +0.008 [−0.012, +0.028] | 0.39 | **+0.008 [+0.002, +0.014]** | **0.006** |
+
+On AP, nothing differs from LR except A7, which is worse. On effort-aware ranking (Popt by score / LOC), tree ensembles and the STAR blend are significantly better than LR.
 
 ## Reading
 
@@ -63,7 +70,7 @@ A7 is significantly worse on AP (−0.121, p < 0.001).
    - RankNet is slightly *harmful* (p = 0.049 over seeds).
    - Validation AP tells the same story: every model sits between 0.68 and 0.70.
 2. **The test set is the limiting factor.** With 292 classes, the AP CI is ±0.07 wide, so any true effect below about 0.03 cannot be detected on one release. This supports Phase 3 (more data, more projects) as the way forward.
-3. **Tree ensembles are the strongest effort-aware baselines**: RF reaches Popt 0.750 and ET reaches R@20 % LOC 0.363, against 0.711 / 0.300 for STAR. STAR's ranking is still size-driven: Popt by raw risk is about 0.38, worse than random. This supports Phase 2 (effort-aware training).
+3. **Tree ensembles are the strongest effort-aware models, and the gap is significant**: RF reaches Popt 0.750 (+0.036 vs LR, p = 0.007) and ET reaches R@20 % LOC 0.363, against 0.711 / 0.300 for STAR. The STAR + LR + ET blend also beats LR on Popt (+0.008, p = 0.006), so STAR contributes when it is combined with the tabular models. STAR's ranking is still size-driven: Popt by raw risk is about 0.38, worse than random. This supports Phase 2 (effort-aware training).
 4. **A7 STAR+ collapses on AP.** Its effort-weighted RankNet pushes small classes up, which gives the best Popt (risk) among the neural models (0.434) but destroys AP. It should be reported as an AP / effort trade-off, not as an improvement.
 5. **Seed-level Wilcoxon tests only measure training-seed variance**, not data variance. The class bootstrap is the honest uncertainty, and conclusions in the report should be based on it.
 6. **The A6 configuration chosen here matches `config_star_r.json`**, which independently confirms the earlier STAR-R search.

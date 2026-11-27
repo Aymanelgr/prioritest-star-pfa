@@ -95,12 +95,12 @@
   {
    "model": "A2_TCN_BCE",
    "metric": "Popt_density",
-   "diff": 0.0021,
+   "diff": -0.0048,
    "CI95": [
-    -0.0074,
-    0.012
+    -0.0309,
+    0.0202
    ],
-   "p": 0.667
+   "p": 0.736
   },
   {
    "model": "A3_graph_classic_fusion_BCE",
@@ -115,12 +115,12 @@
   {
    "model": "A3_graph_classic_fusion_BCE",
    "metric": "Popt_density",
-   "diff": 0.0067,
+   "diff": -0.0001,
    "CI95": [
-    -0.003,
-    0.0174
+    -0.0257,
+    0.0265
    ],
-   "p": 0.191
+   "p": 0.999
   },
   {
    "model": "A4_similarity_fusion_BCE",
@@ -135,12 +135,12 @@
   {
    "model": "A4_similarity_fusion_BCE",
    "metric": "Popt_density",
-   "diff": 0.0078,
+   "diff": 0.003,
    "CI95": [
-    -0.0036,
-    0.0188
+    -0.0254,
+    0.0323
    ],
-   "p": 0.17
+   "p": 0.839
   },
   {
    "model": "A5_plus_InfoNCE",
@@ -155,12 +155,12 @@
   {
    "model": "A5_plus_InfoNCE",
    "metric": "Popt_density",
-   "diff": 0.0056,
+   "diff": 0.004,
    "CI95": [
-    -0.0035,
-    0.0154
+    -0.0143,
+    0.0228
    ],
-   "p": 0.253
+   "p": 0.667
   },
   {
    "model": "A6_STAR_full",
@@ -175,12 +175,12 @@
   {
    "model": "A6_STAR_full",
    "metric": "Popt_density",
-   "diff": 0.0004,
+   "diff": -0.0024,
    "CI95": [
-    -0.0063,
-    0.0076
+    -0.0133,
+    0.008
    ],
-   "p": 0.914
+   "p": 0.676
   },
   {
    "model": "A7_STAR_plus",
@@ -195,12 +195,12 @@
   {
    "model": "A7_STAR_plus",
    "metric": "Popt_density",
-   "diff": 0.0011,
+   "diff": -0.0612,
    "CI95": [
-    -0.0212,
-    0.0243
+    -0.1044,
+    -0.0186
    ],
-   "p": 0.938
+   "p": 0.009
   },
   {
    "model": "A1_HGB",
@@ -215,12 +215,12 @@
   {
    "model": "A1_HGB",
    "metric": "Popt_density",
-   "diff": 0.024,
+   "diff": 0.0245,
    "CI95": [
-    -0.0065,
-    0.0511
+    -0.0185,
+    0.0653
    ],
-   "p": 0.11
+   "p": 0.242
   },
   {
    "model": "B_RF",
@@ -235,12 +235,12 @@
   {
    "model": "B_RF",
    "metric": "Popt_density",
-   "diff": 0.0068,
+   "diff": 0.0362,
    "CI95": [
-    -0.0332,
-    0.0378
+    0.0109,
+    0.0626
    ],
-   "p": 0.666
+   "p": 0.007
   },
   {
    "model": "B_ET",
@@ -255,12 +255,12 @@
   {
    "model": "B_ET",
    "metric": "Popt_density",
-   "diff": 0.0112,
+   "diff": 0.0243,
    "CI95": [
-    -0.0135,
-    0.031
+    0.0123,
+    0.0379
    ],
-   "p": 0.297
+   "p": 0.0
   },
   {
    "model": "B_kNN_cosine",
@@ -275,12 +275,12 @@
   {
    "model": "B_kNN_cosine",
    "metric": "Popt_density",
-   "diff": -0.004,
+   "diff": -0.0039,
    "CI95": [
-    -0.0432,
+    -0.0429,
     0.0363
    ],
-   "p": 0.847
+   "p": 0.854
   },
   {
    "model": "STAR_R_blend",
@@ -295,13 +295,13 @@
   {
    "model": "STAR_R_blend",
    "metric": "Popt_density",
-   "diff": 0.0054,
+   "diff": 0.0078,
    "CI95": [
-    -0.0002,
-    0.0122
+    0.0021,
+    0.0138
    ],
-   "p": 0.062
+   "p": 0.006
   }
  ],
- "seconds": 390.3
+ "seconds": 386.7
 }

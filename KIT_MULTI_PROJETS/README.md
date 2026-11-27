@@ -32,6 +32,18 @@ inspecte d'abord les grosses classes et épuise le budget ; la densité maximise
 (modèles effort-aware : Mende & Koschke 2010 ; Kamei et al. 2013). Le score du modèle n'est pas modifié : seul
 l'ordre d'inspection change, aucun paramètre n'est réglé sur le test.
 
+## Expériences du plan (ARCHITECTURE.md) — une commande par expérience
+| Phase | Commande | Durée CPU (2 cœurs) | Résultats |
+|---|---|---|---|
+| STAR-R (modèle final initial) | `python train_final.py --project ant --groups 5 --ens 10` | ~1 min | `results/star_r/`, `RESULTS_STAR_R.md` |
+| 1 — comparaison équitable + tests | `python compare_fair.py --project ant` | ~6,5 min | `results/phase1/`, `PHASE1_RESULTS.md` |
+| 2 — STAR-E (effort appris) | `python effort_star.py --project ant` | ~4 min | `results/phase2/`, `PHASE2_RESULTS.md` |
+| 3 — données inter-projets | `python more_data.py --project ant` | ~4 min | `results/phase3/`, `PHASE3_RESULTS.md` |
+| 4 — amélioration fusion / contraste | `python improve_star.py --project ant` | ~8 min | `results/phase4/`, `PHASE4_RESULTS.md` |
+| Analyse + application | `python analyse_star.py --project ant` puis `streamlit run app.py` | < 1 min | `results/analysis/` |
+
+Phase 3 et 2 lisent `results/phase1/` : lancer la phase 1 d'abord. Tests : `python -m unittest discover -s tests -v` (30 tests).
+
 ## Exécution (lanceur initial, 4 variantes)
 ```bash
 pip install -r requirements.txt

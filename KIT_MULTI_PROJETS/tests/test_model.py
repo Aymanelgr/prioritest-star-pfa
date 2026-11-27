@@ -129,3 +129,29 @@ class TestLossesAndGradients(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class TestPhase4Losses(unittest.TestCase):
+    def test_supcon_finite_with_gradients(self):
+        from model import supcon_cross_view
+        torch.manual_seed(0)
+        t = torch.randn(12, 8, requires_grad=True); s = torch.randn(12, 8, requires_grad=True)
+        y = torch.tensor([1., 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0])
+        loss = supcon_cross_view(t, s, y); loss.backward()
+        self.assertTrue(torch.isfinite(loss)); self.assertTrue(torch.isfinite(t.grad).all())
+
+    def test_supcon_prefers_aligned_defect_cluster(self):
+        from model import supcon_cross_view
+        y = torch.tensor([1., 1, 0, 0])
+        good = torch.tensor([[1., 0], [1, .1], [0, 1], [-.2, 1]])
+        bad = torch.tensor([[1., 0], [0, 1], [1, .1], [-.2, 1]])
+        self.assertLess(supcon_cross_view(good, good, y), supcon_cross_view(bad, bad, y))
+
+    def test_gate_entropy_max_when_balanced(self):
+        from model import gate_entropy
+        self.assertGreater(gate_entropy(torch.tensor([[.5, .5]])), gate_entropy(torch.tensor([[.9, .1]])))
+
+    def test_gate_absdiff_shapes(self):
+        m = CrossViewSTAR(20, gate_absdiff=True); x = torch.randn(6, 3, 20)
+        out = m(x, torch.tensor([[0, 1], [2, 3]]))
+        self.assertEqual(out['gate'].shape, (6, 2))

@@ -32,7 +32,7 @@ from sklearn.metrics import average_precision_score
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / 'src'))
-from model import (CrossViewSTAR, cross_view_infonce, label_aware_infonce,  # noqa: E402
+from model import (CrossViewSTAR, cross_view_infonce, label_aware_infonce, supcon_cross_view, gate_entropy,  # noqa: E402
                    pairwise_rank_loss, effort_aware_rank_loss)
 from train import load, stats, effort_aware_stats, choose_flag_rate, classification_stats  # noqa: E402
 
@@ -89,7 +89,7 @@ def score_of(out, cfg):
 def build_net(cfg, n_features, device):
     return CrossViewSTAR(n_features, use_graph=cfg['use_graph'], similarity_gate=cfg['similarity_gate'],
                          use_delta=cfg.get('use_delta', False), bidirectional=cfg.get('bidirectional', False),
-                         dropout=cfg.get('dropout', 0.)).to(device)
+                         dropout=cfg.get('dropout', 0.), gate_absdiff=cfg.get('gate_absdiff', False)).to(device)
 
 
 def cohort_loss(net, cfg, hp, a, pos_weight):
@@ -107,9 +107,14 @@ def cohort_loss(net, cfg, hp, a, pos_weight):
             else pairwise_rank_loss(out['rank'], a['y'])
         loss = loss + cfg['lambda_r'] * rl
     if cfg['lambda_c']:
-        cl = label_aware_infonce(out['temporal'], out['structural'], a['y'], hp['temperature']) if cfg.get('label_aware') \
-            else cross_view_infonce(out['temporal'], out['structural'], hp['temperature'])
+        if cfg.get('contrast') == 'supcon':
+            cl = supcon_cross_view(out['temporal'], out['structural'], a['y'], hp['temperature'], cfg.get('sup_weight', .5))
+        else:
+            cl = label_aware_infonce(out['temporal'], out['structural'], a['y'], hp['temperature']) if cfg.get('label_aware') \
+                else cross_view_infonce(out['temporal'], out['structural'], hp['temperature'])
         loss = loss + cfg['lambda_c'] * cl
+    if cfg.get('gate_entropy') and cfg['use_graph']:
+        loss = loss - cfg['gate_entropy'] * gate_entropy(out['gate'])
     return loss
 
 

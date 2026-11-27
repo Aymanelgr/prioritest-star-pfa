@@ -1,0 +1,295 @@
+{
+ "table": {
+  "C0_A5_reference": {
+   "AP": [
+    0.8023,
+    0.0086
+   ],
+   "ROC_AUC": [
+    0.864,
+    0.0056
+   ],
+   "Popt": [
+    0.3761,
+    0.0089
+   ],
+   "Popt_density": [
+    0.7172,
+    0.0055
+   ],
+   "R@20LOC_density": [
+    0.3,
+    0.0218
+   ],
+   "IFA": [
+    0.0,
+    0.0
+   ],
+   "mean_alpha_temporal": 0.625,
+   "val_AP": 0.6876
+  },
+  "C1_label_aware_InfoNCE": {
+   "AP": [
+    0.8022,
+    0.0086
+   ],
+   "ROC_AUC": [
+    0.8642,
+    0.005
+   ],
+   "Popt": [
+    0.3763,
+    0.0085
+   ],
+   "Popt_density": [
+    0.7175,
+    0.006
+   ],
+   "R@20LOC_density": [
+    0.3049,
+    0.0214
+   ],
+   "IFA": [
+    0.0,
+    0.0
+   ],
+   "mean_alpha_temporal": 0.621,
+   "val_AP": 0.6878
+  },
+  "C2_SupCon_hybrid": {
+   "AP": [
+    0.8019,
+    0.0081
+   ],
+   "ROC_AUC": [
+    0.8635,
+    0.0042
+   ],
+   "Popt": [
+    0.3785,
+    0.0077
+   ],
+   "Popt_density": [
+    0.7168,
+    0.0038
+   ],
+   "R@20LOC_density": [
+    0.298,
+    0.0168
+   ],
+   "IFA": [
+    0.0,
+    0.0
+   ],
+   "mean_alpha_temporal": 0.703,
+   "val_AP": 0.6743
+  },
+  "G1_absdiff_gate": {
+   "AP": [
+    0.7912,
+    0.015
+   ],
+   "ROC_AUC": [
+    0.8539,
+    0.0139
+   ],
+   "Popt": [
+    0.3742,
+    0.015
+   ],
+   "Popt_density": [
+    0.7114,
+    0.0041
+   ],
+   "R@20LOC_density": [
+    0.3,
+    0.0115
+   ],
+   "IFA": [
+    0.0,
+    0.0
+   ],
+   "mean_alpha_temporal": 0.755,
+   "val_AP": 0.6883
+  },
+  "G2_gate_entropy": {
+   "AP": [
+    0.8023,
+    0.0088
+   ],
+   "ROC_AUC": [
+    0.8638,
+    0.0056
+   ],
+   "Popt": [
+    0.3766,
+    0.0084
+   ],
+   "Popt_density": [
+    0.7167,
+    0.0053
+   ],
+   "R@20LOC_density": [
+    0.298,
+    0.0208
+   ],
+   "IFA": [
+    0.0,
+    0.0
+   ],
+   "mean_alpha_temporal": 0.554,
+   "val_AP": 0.6879
+  },
+  "C2G1_SupCon_absdiff_gate": {
+   "AP": [
+    0.7986,
+    0.0051
+   ],
+   "ROC_AUC": [
+    0.8595,
+    0.0052
+   ],
+   "Popt": [
+    0.3816,
+    0.008
+   ],
+   "Popt_density": [
+    0.7125,
+    0.0049
+   ],
+   "R@20LOC_density": [
+    0.2941,
+    0.0185
+   ],
+   "IFA": [
+    0.0,
+    0.0
+   ],
+   "mean_alpha_temporal": 0.682,
+   "val_AP": 0.674
+  }
+ },
+ "tests_vs_A5": [
+  {
+   "model": "C1_label_aware_InfoNCE",
+   "metric": "AP",
+   "diff": 0.0013,
+   "CI95": [
+    -0.0014,
+    0.0045
+   ],
+   "p_bootstrap": 0.332,
+   "mean_seed_diff": -0.0,
+   "p_wilcoxon_seeds": 0.6953
+  },
+  {
+   "model": "C1_label_aware_InfoNCE",
+   "metric": "Popt_density",
+   "diff": -0.0004,
+   "CI95": [
+    -0.0035,
+    0.0024
+   ],
+   "p_bootstrap": 0.891,
+   "mean_seed_diff": 0.0004,
+   "p_wilcoxon_seeds": 0.2754
+  },
+  {
+   "model": "C2_SupCon_hybrid",
+   "metric": "AP",
+   "diff": 0.0003,
+   "CI95": [
+    -0.0065,
+    0.0064
+   ],
+   "p_bootstrap": 0.898,
+   "mean_seed_diff": -0.0003,
+   "p_wilcoxon_seeds": 0.8457
+  },
+  {
+   "model": "C2_SupCon_hybrid",
+   "metric": "Popt_density",
+   "diff": -0.0022,
+   "CI95": [
+    -0.0109,
+    0.0061
+   ],
+   "p_bootstrap": 0.601,
+   "mean_seed_diff": -0.0004,
+   "p_wilcoxon_seeds": 0.8457
+  },
+  {
+   "model": "G1_absdiff_gate",
+   "metric": "AP",
+   "diff": -0.0058,
+   "CI95": [
+    -0.0135,
+    0.0009
+   ],
+   "p_bootstrap": 0.087,
+   "mean_seed_diff": -0.011,
+   "p_wilcoxon_seeds": 0.0488
+  },
+  {
+   "model": "G1_absdiff_gate",
+   "metric": "Popt_density",
+   "diff": -0.0055,
+   "CI95": [
+    -0.0233,
+    0.0115
+   ],
+   "p_bootstrap": 0.545,
+   "mean_seed_diff": -0.0058,
+   "p_wilcoxon_seeds": 0.0137
+  },
+  {
+   "model": "G2_gate_entropy",
+   "metric": "AP",
+   "diff": 0.0003,
+   "CI95": [
+    -0.0012,
+    0.0025
+   ],
+   "p_bootstrap": 0.828,
+   "mean_seed_diff": 0.0,
+   "p_wilcoxon_seeds": 0.9219
+  },
+  {
+   "model": "G2_gate_entropy",
+   "metric": "Popt_density",
+   "diff": -0.0002,
+   "CI95": [
+    -0.0022,
+    0.0017
+   ],
+   "p_bootstrap": 0.844,
+   "mean_seed_diff": -0.0004,
+   "p_wilcoxon_seeds": 0.4316
+  },
+  {
+   "model": "C2G1_SupCon_absdiff_gate",
+   "metric": "AP",
+   "diff": -0.003,
+   "CI95": [
+    -0.0105,
+    0.0036
+   ],
+   "p_bootstrap": 0.355,
+   "mean_seed_diff": -0.0037,
+   "p_wilcoxon_seeds": 0.3223
+  },
+  {
+   "model": "C2G1_SupCon_absdiff_gate",
+   "metric": "Popt_density",
+   "diff": -0.0019,
+   "CI95": [
+    -0.0082,
+    0.0044
+   ],
+   "p_bootstrap": 0.54,
+   "mean_seed_diff": -0.0047,
+   "p_wilcoxon_seeds": 0.084
+  }
+ ],
+ "seconds": 286.8
+}

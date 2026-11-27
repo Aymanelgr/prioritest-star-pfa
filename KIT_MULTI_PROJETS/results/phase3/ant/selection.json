@@ -1,0 +1,28 @@
+{
+ "X0_ant_only": {
+  "epochs": 24,
+  "val_AP": 0.6876
+ },
+ "X1_others_only": {
+  "epochs": 46,
+  "val_AP": 0.6881
+ },
+ "X2_joint": {
+  "epochs": 34,
+  "val_AP": 0.7125
+ },
+ "X3_pretrain_finetune": {
+  "ft_epochs": 31,
+  "val_AP": 0.6818,
+  "pre_epochs": 46
+ },
+ "tab_ant_only": {
+  "LR_val_AP": 0.7037
+ },
+ "tab_others_only": {
+  "LR_val_AP": 0.6965
+ },
+ "tab_joint": {
+  "LR_val_AP": 0.7164
+ }
+}

@@ -1,0 +1,587 @@
+{
+ "project": "ant",
+ "test": "1.7",
+ "other_windows": [
+  "camel-1.4",
+  "camel-1.6",
+  "jedit-4.1",
+  "jedit-4.2",
+  "jedit-4.3",
+  "log4j-1.2",
+  "lucene-2.4",
+  "poi-2.5",
+  "poi-3.0",
+  "synapse-1.2",
+  "velocity-1.6",
+  "xalan-2.6",
+  "xerces-1.3"
+ ],
+ "n_other_classes": 3399,
+ "selection": {
+  "X0_ant_only": {
+   "epochs": 24,
+   "val_AP": 0.6876
+  },
+  "X1_others_only": {
+   "epochs": 46,
+   "val_AP": 0.6881
+  },
+  "X2_joint": {
+   "epochs": 34,
+   "val_AP": 0.7125
+  },
+  "X3_pretrain_finetune": {
+   "ft_epochs": 31,
+   "val_AP": 0.6818,
+   "pre_epochs": 46
+  },
+  "tab_ant_only": {
+   "LR_val_AP": 0.7037
+  },
+  "tab_others_only": {
+   "LR_val_AP": 0.6965
+  },
+  "tab_joint": {
+   "LR_val_AP": 0.7164
+  }
+ },
+ "table": {
+  "STAR_X0_ant_only": {
+   "AP": [
+    0.8023,
+    0.0086
+   ],
+   "ROC_AUC": [
+    0.864,
+    0.0056
+   ],
+   "Popt_density": [
+    0.7172,
+    0.0055
+   ],
+   "R@20LOC_density": [
+    0.3,
+    0.0218
+   ],
+   "AP_ens": [
+    0.8053,
+    0.734,
+    0.8663
+   ],
+   "ROC_AUC_ens": [
+    0.866,
+    0.8224,
+    0.9069
+   ],
+   "Popt_density_ens": [
+    0.7177,
+    0.6521,
+    0.7688
+   ],
+   "R@20LOC_density_ens": [
+    0.2941,
+    0.2174,
+    0.3738
+   ]
+  },
+  "STAR_X1_others_only": {
+   "AP": [
+    0.7338,
+    0.0082
+   ],
+   "ROC_AUC": [
+    0.8268,
+    0.0039
+   ],
+   "Popt_density": [
+    0.6989,
+    0.0019
+   ],
+   "R@20LOC_density": [
+    0.2647,
+    0.0131
+   ],
+   "AP_ens": [
+    0.737,
+    0.6519,
+    0.8207
+   ],
+   "ROC_AUC_ens": [
+    0.8274,
+    0.7764,
+    0.8727
+   ],
+   "Popt_density_ens": [
+    0.6989,
+    0.6318,
+    0.7539
+   ],
+   "R@20LOC_density_ens": [
+    0.2549,
+    0.1839,
+    0.354
+   ]
+  },
+  "STAR_X2_joint": {
+   "AP": [
+    0.7953,
+    0.0058
+   ],
+   "ROC_AUC": [
+    0.8567,
+    0.0051
+   ],
+   "Popt_density": [
+    0.7102,
+    0.0041
+   ],
+   "R@20LOC_density": [
+    0.2873,
+    0.0147
+   ],
+   "AP_ens": [
+    0.797,
+    0.7221,
+    0.8601
+   ],
+   "ROC_AUC_ens": [
+    0.8574,
+    0.8119,
+    0.8988
+   ],
+   "Popt_density_ens": [
+    0.7106,
+    0.6444,
+    0.7616
+   ],
+   "R@20LOC_density_ens": [
+    0.2745,
+    0.2,
+    0.3684
+   ]
+  },
+  "STAR_X3_pretrain_finetune": {
+   "AP": [
+    0.7737,
+    0.0089
+   ],
+   "ROC_AUC": [
+    0.8458,
+    0.0053
+   ],
+   "Popt_density": [
+    0.7031,
+    0.0059
+   ],
+   "R@20LOC_density": [
+    0.2775,
+    0.016
+   ],
+   "AP_ens": [
+    0.7801,
+    0.6999,
+    0.8511
+   ],
+   "ROC_AUC_ens": [
+    0.849,
+    0.8021,
+    0.8919
+   ],
+   "Popt_density_ens": [
+    0.704,
+    0.6358,
+    0.7566
+   ],
+   "R@20LOC_density_ens": [
+    0.3039,
+    0.2043,
+    0.3611
+   ]
+  },
+  "LR_ant_only": {
+   "AP": [
+    0.7981,
+    0.0
+   ],
+   "ROC_AUC": [
+    0.8637,
+    0.0
+   ],
+   "Popt_density": [
+    0.7137,
+    0.0
+   ],
+   "R@20LOC_density": [
+    0.3235,
+    0.0
+   ],
+   "AP_ens": [
+    0.7981,
+    0.7205,
+    0.8652
+   ],
+   "ROC_AUC_ens": [
+    0.8637,
+    0.8209,
+    0.9059
+   ],
+   "Popt_density_ens": [
+    0.7137,
+    0.6482,
+    0.766
+   ],
+   "R@20LOC_density_ens": [
+    0.3235,
+    0.2333,
+    0.3846
+   ]
+  },
+  "RF_ant_only": {
+   "AP": [
+    0.809,
+    0.0018
+   ],
+   "ROC_AUC": [
+    0.8787,
+    0.0012
+   ],
+   "Popt_density": [
+    0.75,
+    0.0014
+   ],
+   "R@20LOC_density": [
+    0.349,
+    0.0112
+   ],
+   "AP_ens": [
+    0.8101,
+    0.7263,
+    0.8801
+   ],
+   "ROC_AUC_ens": [
+    0.8786,
+    0.8345,
+    0.9191
+   ],
+   "Popt_density_ens": [
+    0.7506,
+    0.6878,
+    0.7962
+   ],
+   "R@20LOC_density_ens": [
+    0.3627,
+    0.2738,
+    0.42
+   ]
+  },
+  "LR_others_only": {
+   "AP": [
+    0.7179,
+    0.0
+   ],
+   "ROC_AUC": [
+    0.8267,
+    0.0
+   ],
+   "Popt_density": [
+    0.7064,
+    0.0
+   ],
+   "R@20LOC_density": [
+    0.2745,
+    0.0
+   ],
+   "AP_ens": [
+    0.7179,
+    0.6257,
+    0.81
+   ],
+   "ROC_AUC_ens": [
+    0.8267,
+    0.7771,
+    0.8735
+   ],
+   "Popt_density_ens": [
+    0.7064,
+    0.6387,
+    0.759
+   ],
+   "R@20LOC_density_ens": [
+    0.2745,
+    0.2,
+    0.3579
+   ]
+  },
+  "RF_others_only": {
+   "AP": [
+    0.7356,
+    0.0102
+   ],
+   "ROC_AUC": [
+    0.8247,
+    0.0104
+   ],
+   "Popt_density": [
+    0.7105,
+    0.0014
+   ],
+   "R@20LOC_density": [
+    0.3098,
+    0.0088
+   ],
+   "AP_ens": [
+    0.7385,
+    0.6508,
+    0.8293
+   ],
+   "ROC_AUC_ens": [
+    0.8264,
+    0.7714,
+    0.8773
+   ],
+   "Popt_density_ens": [
+    0.7101,
+    0.6456,
+    0.7633
+   ],
+   "R@20LOC_density_ens": [
+    0.3137,
+    0.2366,
+    0.3774
+   ]
+  },
+  "LR_joint": {
+   "AP": [
+    0.768,
+    0.0
+   ],
+   "ROC_AUC": [
+    0.8426,
+    0.0
+   ],
+   "Popt_density": [
+    0.7059,
+    0.0
+   ],
+   "R@20LOC_density": [
+    0.3039,
+    0.0
+   ],
+   "AP_ens": [
+    0.768,
+    0.6864,
+    0.8422
+   ],
+   "ROC_AUC_ens": [
+    0.8426,
+    0.7964,
+    0.8881
+   ],
+   "Popt_density_ens": [
+    0.7059,
+    0.6391,
+    0.7585
+   ],
+   "R@20LOC_density_ens": [
+    0.3039,
+    0.2211,
+    0.3627
+   ]
+  },
+  "RF_joint": {
+   "AP": [
+    0.7806,
+    0.0039
+   ],
+   "ROC_AUC": [
+    0.8673,
+    0.002
+   ],
+   "Popt_density": [
+    0.7368,
+    0.0025
+   ],
+   "R@20LOC_density": [
+    0.3255,
+    0.0044
+   ],
+   "AP_ens": [
+    0.7791,
+    0.6892,
+    0.868
+   ],
+   "ROC_AUC_ens": [
+    0.8675,
+    0.8213,
+    0.9121
+   ],
+   "Popt_density_ens": [
+    0.7364,
+    0.6674,
+    0.7885
+   ],
+   "R@20LOC_density_ens": [
+    0.3235,
+    0.2556,
+    0.4
+   ]
+  }
+ },
+ "tests": [
+  {
+   "model": "STAR_X1_others_only",
+   "vs": "STAR_X0_ant_only",
+   "metric": "AP",
+   "diff": -0.0683,
+   "CI95": [
+    -0.1185,
+    -0.0226
+   ],
+   "p": 0.0
+  },
+  {
+   "model": "STAR_X1_others_only",
+   "vs": "STAR_X0_ant_only",
+   "metric": "Popt_density",
+   "diff": -0.0187,
+   "CI95": [
+    -0.0407,
+    -0.0001
+   ],
+   "p": 0.05
+  },
+  {
+   "model": "STAR_X2_joint",
+   "vs": "STAR_X0_ant_only",
+   "metric": "AP",
+   "diff": -0.0083,
+   "CI95": [
+    -0.0214,
+    0.0046
+   ],
+   "p": 0.193
+  },
+  {
+   "model": "STAR_X2_joint",
+   "vs": "STAR_X0_ant_only",
+   "metric": "Popt_density",
+   "diff": -0.007,
+   "CI95": [
+    -0.0195,
+    0.0048
+   ],
+   "p": 0.223
+  },
+  {
+   "model": "STAR_X3_pretrain_finetune",
+   "vs": "STAR_X0_ant_only",
+   "metric": "AP",
+   "diff": -0.0253,
+   "CI95": [
+    -0.0506,
+    -0.0016
+   ],
+   "p": 0.034
+  },
+  {
+   "model": "STAR_X3_pretrain_finetune",
+   "vs": "STAR_X0_ant_only",
+   "metric": "Popt_density",
+   "diff": -0.0137,
+   "CI95": [
+    -0.0438,
+    0.0134
+   ],
+   "p": 0.355
+  },
+  {
+   "model": "LR_joint",
+   "vs": "LR_ant_only",
+   "metric": "AP",
+   "diff": -0.0302,
+   "CI95": [
+    -0.0544,
+    -0.0077
+   ],
+   "p": 0.002
+  },
+  {
+   "model": "LR_joint",
+   "vs": "LR_ant_only",
+   "metric": "Popt_density",
+   "diff": -0.0077,
+   "CI95": [
+    -0.0165,
+    0.0009
+   ],
+   "p": 0.075
+  },
+  {
+   "model": "RF_joint",
+   "vs": "RF_ant_only",
+   "metric": "AP",
+   "diff": -0.031,
+   "CI95": [
+    -0.0596,
+    0.0069
+   ],
+   "p": 0.131
+  },
+  {
+   "model": "RF_joint",
+   "vs": "RF_ant_only",
+   "metric": "Popt_density",
+   "diff": -0.0142,
+   "CI95": [
+    -0.0398,
+    0.0088
+   ],
+   "p": 0.219
+  },
+  {
+   "model": "STAR_X2_joint",
+   "vs": "RF_joint",
+   "metric": "AP",
+   "diff": 0.018,
+   "CI95": [
+    -0.0331,
+    0.0599
+   ],
+   "p": 0.598
+  },
+  {
+   "model": "STAR_X2_joint",
+   "vs": "RF_joint",
+   "metric": "Popt_density",
+   "diff": -0.0258,
+   "CI95": [
+    -0.0627,
+    0.0157
+   ],
+   "p": 0.205
+  },
+  {
+   "model": "STAR_X2_joint",
+   "vs": "LR_joint",
+   "metric": "AP",
+   "diff": 0.0291,
+   "CI95": [
+    0.0007,
+    0.0607
+   ],
+   "p": 0.04
+  },
+  {
+   "model": "STAR_X2_joint",
+   "vs": "LR_joint",
+   "metric": "Popt_density",
+   "diff": 0.0047,
+   "CI95": [
+    -0.0077,
+    0.0169
+   ],
+   "p": 0.437
+  }
+ ],
+ "seconds": 229.1
+}

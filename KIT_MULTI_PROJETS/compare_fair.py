@@ -7,7 +7,8 @@ Same procedure for EVERY model (no model gets a bigger search than another of it
      tabular models: small grid of their main regularisation parameter;
   2. refit on windows 1+2 with the chosen settings, 10 seeds;
   3. ONE evaluation on window 3 (test).
-Statistics: mean ± std over seeds, class-bootstrap 95 % CI of the 10-seed rank ensemble, Wilcoxon + Cliff's δ
+Statistics: mean ± std over seeds, class-bootstrap 95 % CI of the 10-seed ensemble (rank average for rank metrics,
+mean score for score/LOC density metrics — dividing a rank by LOC would distort the order), Wilcoxon + Cliff's δ
 between consecutive ablation steps, paired bootstrap of every model against logistic regression.
 
 Usage: python compare_fair.py --project ant            (~10 min on 2 CPU cores)
@@ -121,24 +122,25 @@ def main():
     data[te] = load(ROOT / 'data' / a.project / f'{a.project}-{te}.npz', 'cpu'); data[te]['x'] = signed_log(data[te]['x'])
     dt = data[te]; Xte = tab_X(dt); keys = [tr, val]
     Xall = np.concatenate([Xtr, Xv]); yall = np.concatenate([ytr, yv])
-    per_seed, ens = {}, {}
+    per_seed, ens, prob = {}, {}, {}   # ens = rank average (rank metrics); prob = mean score (density metrics)
     for n in NEURAL:
         t = tuning[n]; t0 = time.time(); runs = []
         for s in seeds:
             net = train_net(t['cfg'], t['hp'], data, keys, t['epochs'], s)
             with torch.no_grad():
                 runs.append(score_of(net(dt['x'], dt['edges']), t['cfg']).numpy())
-        per_seed[n] = [evaluate(r, dt) for r in runs]; ens[n] = np.mean([rank01(r) for r in runs], 0)
+        per_seed[n] = [evaluate(r, dt) for r in runs]; ens[n] = np.mean([rank01(r) for r in runs], 0); prob[n] = np.mean(runs, 0)
         print(f'  [test] {n:30s} AP={np.mean([r["AP"] for r in per_seed[n]]):.4f} ({time.time() - t0:.0f}s)', flush=True)
     for n in TABULAR:
         runs = [TABULAR[n](tuning[n]['params'], s).fit(Xall, yall).predict_proba(Xte)[:, 1] for s in seeds]
-        per_seed[n] = [evaluate(r, dt) for r in runs]; ens[n] = np.mean([rank01(r) for r in runs], 0)
-    r = knn_cosine(Xall, yall, Xte, knn); per_seed['B_kNN_cosine'] = [evaluate(r, dt)] * len(seeds); ens['B_kNN_cosine'] = r
+        per_seed[n] = [evaluate(r, dt) for r in runs]; ens[n] = np.mean([rank01(r) for r in runs], 0); prob[n] = np.mean(runs, 0)
+    r = knn_cosine(Xall, yall, Xte, knn); per_seed['B_kNN_cosine'] = [evaluate(r, dt)] * len(seeds); ens['B_kNN_cosine'] = r; prob['B_kNN_cosine'] = r
     # STAR-R blend as in train_final.py: A6-tuned STAR ensemble + LR + ET, rank average (fixed a priori here)
     ens['STAR_R_blend'] = np.mean([ens['A6_STAR_full'], rank01(ens['B_LR']), rank01(ens['B_ET'])], 0)
-    per_seed['STAR_R_blend'] = [evaluate(ens['STAR_R_blend'], dt)] * len(seeds)   # deterministic given ensembles
+    prob['STAR_R_blend'] = np.mean([prob['A6_STAR_full'], prob['B_LR'], prob['B_ET']], 0)
+    per_seed['STAR_R_blend'] = [{**evaluate(ens['STAR_R_blend'], dt), **{m: v for m, v in evaluate(prob['STAR_R_blend'], dt).items() if 'density' in m}}] * len(seeds)
     np.savez_compressed(out / 'test_scores.npz', ids=dt['ids'], y=dt['y'].numpy(), loc=dt['loc'],
-                        **{k: v for k, v in ens.items()})
+                        **{k: v for k, v in ens.items()}, **{f'prob_{k}': v for k, v in prob.items()})
 
     # ---------------- statistics ----------------
     y = dt['y'].numpy().astype(int); loc = dt['loc']; rows = []
@@ -148,7 +150,7 @@ def main():
             v = [x[m] for x in per_seed[n]]
             row[f'{m}_mean'] = round(float(np.mean(v)), 4); row[f'{m}_std'] = round(float(np.std(v, ddof=1)), 4)
         for m in ['AP', 'Popt_density', 'R@20LOC_density']:
-            e, lo, hi = S.bootstrap_ci(ens[n], y, loc, m, a.boot)
+            e, lo, hi = S.bootstrap_ci(prob[n] if 'density' in m else ens[n], y, loc, m, a.boot)
             row[f'{m}_ens'] = round(e, 4); row[f'{m}_ens_CI'] = f'[{lo:.3f}, {hi:.3f}]'
         rows.append(row)
     with (out / 'table.csv').open('w', newline='') as f:
@@ -165,7 +167,8 @@ def main():
         if n == 'B_LR':
             continue
         for m in ['AP', 'Popt_density']:
-            d_, lo, hi, p = S.paired_bootstrap(ens[n], ens['B_LR'], y, loc, m, a.boot)
+            src = prob if 'density' in m else ens
+            d_, lo, hi, p = S.paired_bootstrap(src[n], src['B_LR'], y, loc, m, a.boot)
             tests['vs_LR'].append({'model': n, 'metric': m, 'diff': round(d_, 4), 'CI95': [round(lo, 4), round(hi, 4)], 'p': round(p, 4)})
     tests['seconds'] = round(time.time() - t_all, 1)
     (out / 'tests.json').write_text(json.dumps(tests, indent=1))

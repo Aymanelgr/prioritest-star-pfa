@@ -1,76 +1,62 @@
-# PRIORITEST-STAR — Architecture & Roadmap
+# PRIORITEST-STAR — Architecture & Roadmap (v2, evidence-based)
 
-> Effort-aware prioritisation of defect-prone Java classes (PROMISE) with a temporal view (TCN),
+> Effort-aware prioritisation of defect-prone Java classes (PROMISE): a temporal view (causal TCN over 3 releases),
 > a structural view (GraphSAGE on Java imports), similarity-guided fusion, cross-view InfoNCE and RankNet.
 > EMSI Marrakech — PFA IA, 5th year.
 
-This file is the master plan. It says **where the project stands**, **what the final system looks like**,
-and **every step still needed**, in order, with the command to run and the proof that the step is done.
+This file is the master plan. It records:
+1. the **ground rules** of the project;
+2. **what is built** and **what each experiment showed**;
+3. the **target architecture** of the repo and the model;
+4. **every remaining step**, with the command to run and the proof that it is done.
+
+v1 (27 Nov) planned Phases 0–8. Phases 0–4 have since been executed; v2 rewrites the rest of the plan around their results.
 
 ---
 
 ## 0. Ground rules (never broken)
 
-These come from the FICHE and the GUIDE. Every step below must respect them, and the report must state them.
-
 | # | Rule | How it is enforced |
 |---|---|---|
-| R1 | **Detection of defects in the observed release**, never "prediction of the next release". | Wording in README, report, app caption. |
-| R2 | **Test release is touched once**, after every choice is frozen. No epoch, λ, threshold, blend or seed picked on test. | `explore_val.py` never loads the test; `train_final.py` evaluates it once per group. |
-| R3 | Normalisation fitted on the **train window only**. | `prepare_multi.py` + signed-log on top. |
-| R4 | The import graph is a **partial proxy**, not a full dependency graph. | Stated in data chapter + limits. |
-| R5 | New classes (no 3-release history) are **excluded** → selection bias must be analysed. | Phase 3 cold-start study. |
-| R6 | ≥ 3 seeds (target 5–10), report **mean ± std**, parameter counts and measured times. | `summary.csv`, `final_metrics.json`. |
-| R7 | Each ablation adds **one** mechanism and is retrained from scratch on identical splits. | `run_star.py` A1→A6. |
-| R8 | Rhazi et al. (2026) is cited for the *principle* of similarity learning; STAR is **not** a reproduction of it. | State of the art + positioning table. |
+| R1 | **Detection of defects in the observed release**, never "prediction of the next release". | README, report, app caption |
+| R2 | **The test release is used once**, after every choice is frozen. No epoch, λ, threshold, blend or seed is chosen on test. | Every script searches on window 2 with the test not loaded, then evaluates window 3 once |
+| R3 | Normalisation fitted on the **train window only** (per project). | `prepare_multi.py` + signed-log |
+| R4 | The import graph is a **partial proxy**, not a full dependency graph. | Data chapter + limits |
+| R5 | New classes (no 3-release history) are **excluded** → selection bias must be analysed. | Step 5.3 (needs the PROMISE archive) |
+| R6 | 10 seeds, mean ± std, **class-bootstrap 95 % CI**, paired tests, measured times. | `src/stats.py` |
+| R7 | Each ablation adds **one** mechanism, retrained from scratch on identical splits, **same tuning budget**. | `compare_fair.py` |
+| R8 | Rhazi et al. (2026) cited for the *principle* of similarity learning; STAR is **not** a reproduction. | State of the art |
 
 ---
 
-## 1. Where the project stands (audit, 27 Nov 2026)
+## 1. Status (27 Nov 2026)
 
-### 1.1 Done
+### 1.1 Built
 
-| Area | Status | Files |
-|---|---|---|
-| Data kit (10 projects, 16 windows, temporal-graph extension) | ✅ verified (`check_graph_temporal.py` OK) | `data/`, `prepare_multi.py` |
-| Model: causal TCN, MeanSAGE (uni/bi-directional), similarity gate, Δ-metrics, dropout/LayerNorm | ✅ | `src/model.py` |
-| Losses: BCE (+pos_weight), InfoNCE, label-aware InfoNCE, RankNet, effort-aware RankNet | ✅ | `src/model.py` |
-| Metrics: AP, ROC-AUC, Recall@20% classes / LOC, effort-aware Recall@20% LOC, Acc/BalAcc/MCC/F1 with validation-chosen flag rate | ✅ | `src/train.py` |
-| Ablation ladder A1→A6 + A7 STAR+ + A8 ensemble, tuning on validation, 5 seeds | ✅ | `run_star.py` |
-| Validation-only grid (192 configs × 3 seeds, smoothed seed-averaged epoch) | ✅ | `explore_val.py`, `config_star_r.json` |
-| STAR-R final: 10-seed STAR ensemble + LR/ET blend chosen on validation, refit train+val, 5 groups | ✅ | `train_final.py`, `results/star_r/` |
-| Analysis: budget–recall curve, Popt, α/β, agreement, error cases | ✅ | `analyse_star.py`, `results/analysis/` |
-| Streamlit app (Top-k, LOC budget, density vs risk ordering) | ✅ | `app.py` |
-| Unit tests (19) | ✅ | `tests/` |
-| Colab notebook | ✅ (does not yet run STAR-R / analysis / app) | `notebooks/PRIORITEST_STAR_Colab.ipynb` |
-| LaTeX report (8 chapters) | ✅ first full draft | `rapport/` |
+| Component | Files |
+|---|---|
+| Data kit: 10 projects, 16 windows, temporal-graph extension (verified) | `data/`, `prepare_multi.py`, `check_graph_temporal.py` |
+| Model: causal TCN, MeanSAGE, similarity gate, Δ-input, \|zT − zS\| gate option | `src/model.py` |
+| Losses: BCE + pos_weight, InfoNCE, label-aware InfoNCE, **SupCon hybrid**, RankNet, effort RankNet, **gate entropy** | `src/model.py`, `run_star.py` |
+| Metrics: AP, ROC, Popt, IFA, Recall@LOC, flag-rate Acc/MCC/F1 | `src/train.py`, `src/stats.py` |
+| Statistics: class bootstrap CI, paired bootstrap, Wilcoxon, Cliff's δ | `src/stats.py` |
+| Ablation ladder A1–A8, STAR-R final model, validation search | `run_star.py`, `explore_val.py`, `train_final.py` |
+| Phase 1 fair comparison, Phase 2 STAR-E, Phase 3 cross-project, Phase 4 improvements | `compare_fair.py`, `effort_star.py`, `more_data.py`, `improve_star.py` |
+| Analysis figures, Streamlit app, LaTeX report draft | `analyse_star.py`, `app.py`, `rapport/` |
+| 30 unit tests | `tests/` |
 
-### 1.2 Current numbers (from `RESULTS_STAR_R.md`, Ant 1.5 → 1.6 → 1.7)
+### 1.2 What the experiments showed (Ant: train 1.5 → val 1.6 → test 1.7)
 
-| Model | AP | ROC-AUC | MCC | EA-R@20%LOC |
-|---|---|---|---|---|
-| A1 boosting | 0.752 | 0.843 | 0.472 | 0.314 |
-| A6 STAR full (default) | 0.760 ± 0.024 | 0.832 | 0.480 | 0.312 |
-| STAR-R FINAL (val-chosen blend) | **0.799 ± 0.003** | **0.870** | **0.610** | 0.320 |
-| Logistic regression alone | 0.798 | 0.864 | 0.604 | 0.304 |
+| Phase | Question | Answer | Write-up |
+|---|---|---|---|
+| 1 | Does each STAR mechanism help, under an equal tuning budget? | **No significant gain** at any step. A2–A6 ≈ LR (AP ≈ 0.80, CI ± 0.07). RankNet is slightly harmful (p = 0.049). Tree ensembles are significantly better than LR on effort ranking (RF Popt 0.750, +0.036, p = 0.007). The STAR + LR + ET blend also beats LR on Popt (+0.008, p = 0.006). | `PHASE1_RESULTS.md` |
+| 2 | Does learning effort-awareness (s = rank − γ·log LOC) beat post-hoc score / LOC? | **No.** γ is learned at ≈ 1, which is the post-hoc rule. Popt 0.711, the same as LR + density, and below RF + density (−0.038, p = 0.01). | `PHASE2_RESULTS.md` |
+| 3 | Does more data (3 399 classes from 9 other projects) help? | **No, because of distribution shift.** Joint −0.008 AP (n.s.); pre-training −0.025 (p = 0.03); zero-shot 0.734. **But STAR is the most robust to mixing projects:** STAR-joint beats LR-joint +0.029 (p = 0.04), while LR loses 0.030 with the same data. | `PHASE3_RESULTS.md` |
+| 4 | Personal improvement of fusion / contrast | Label-aware InfoNCE and SupCon are neutral. **Gate entropy** balances the views (α 0.63 → 0.55) at no cost; retained for interpretability. The \|zT − zS\| gate is harmful. | `PHASE4_RESULTS.md` |
 
-`analysis.json` adds: **Popt** STAR-R sorted by risk = 0.369 (< random 0.502), sorted by risk/LOC = 0.719.
-JEdit 4.3 test = 5 positives / 179 → AP ≈ 0.26, not interpretable on its own.
-
-### 1.3 What these numbers tell us (the real gaps)
-
-1. **The network ≈ a regularised logistic regression.** Graph + contrastive add little measurable signal on Ant
-   (118 training classes, 20 positives). This is the central scientific finding to *test harder*, not hide.
-2. **The model is size-driven.** Sorting by raw risk is *worse than random* under a LOC budget (Popt 0.37).
-   Effort-awareness is only applied *after* training (score/LOC). The ranking objective never sees effort.
-3. **Training data is tiny.** The strict 3-release intersection keeps 118 of 293 Ant-1.5 nodes. The
-   `_graph_temporal.npz` files (all nodes, all 3 graphs, temporal links) are **not used yet**.
-4. **No statistical tests.** Differences of 0.001–0.01 AP are reported without CIs or significance.
-5. **One real study project.** JEdit test is degenerate; Camel/POI (2 windows) are run only exploratorily.
-6. **Ablations are not tuned equally.** A2–A6 use defaults; STAR-R uses a 192-config grid → unfair comparison.
-7. **Repo hygiene.** Results are git-ignored, `requirements.txt` lacks `streamlit`, `altair`, `joblib`;
-   `.venv/` and `__pycache__/` are in the working folder; local work is not pushed; the notebook stops before STAR-R.
-8. **GUIDE inconsistency.** GUIDE says "4 variants", FICHE says a 6-step ladder → keep the ladder, also report the 4 kit variants for traceability.
+**The central finding.** On Ant, what limits performance is **data size and the information in the CK metrics**, not STAR's architecture. One test release of 292 classes cannot resolve effects below about 0.03 AP. The defensible STAR-specific results are:
+- STAR is **robust to cross-project data**, where linear models degrade;
+- STAR is **useful in a blend**: it significantly improves effort-aware ranking over LR.
 
 ---
 
@@ -79,245 +65,172 @@ JEdit 4.3 test = 5 positives / 179 → AP ≈ 0.26, not interpretable on its own
 ### 2.1 System view
 
 ```
-PROMISE archive ──prepare_multi.py──▶ data/<proj>/<proj>-<v>.npz          (strict 3-release windows)
-                                     data/<proj>/<proj>-<v>_graph_temporal.npz (all nodes, 3 graphs, temporal links)
+PROMISE archive ──prepare_multi.py──▶ data/<proj>/<proj>-<v>.npz                (strict 3-release windows, labelled)
+                                     data/<proj>/<proj>-<v>_graph_temporal.npz  (all nodes, 3 graphs, temporal links)
                                               │
+                  src/data.py (step 5.1): window loader · signed-log · masks · multi-project cohorts · domain ids
                                               ▼
-                     ┌──────────── src/data.py (NEW) ─────────────┐
-                     │ load window · signed-log · masks · cohorts │
-                     │ cold-start nodes (mask) · multi-project    │
-                     └────────────────────┬───────────────────────┘
-                                          ▼
-         ┌──────────────────────── src/model.py ───────────────────────────┐
-         │  x[N,3,F] ─▶ TCN causal (k=2, d=1,2) ─▶ zT[N,32]                │
-         │  x[N,-1,F] + edges ─▶ MeanSAGE ×2 ─▶ zS[N,32]                   │
-         │  a = cos(zT,zS) ─▶ gate MLP([zT,zS,a]) ─▶ α,β ─▶ z = αzT + βzS  │
-         │  heads: risk(z) → BCE      rank(z, log LOC) → RankNet/LambdaRank│
-         │  loss = BCE + λc·InfoNCE(zT,zS) + λr·Rank                       │
-         └───────────────────────────────┬─────────────────────────────────┘
-                                         ▼
-   run_star.py (ablations A1–A8)   explore_val.py (val-only search)   train_final.py (STAR-R, single test)
-                                         ▼
-          src/stats.py (NEW): bootstrap CI · Wilcoxon · Cliff's δ · Scott-Knott ranking
-                                         ▼
-     results/<exp>/… (json, csv, .pt)  ─▶  analyse_star.py (figures)  ─▶  app.py (Streamlit)  ─▶  rapport/
+ ┌──────────────────────────────────── src/model.py ─────────────────────────────────────┐
+ │ x[N,3,F] → causal TCN (k=2, dil. 1,2) → zT[N,32]                                      │
+ │ x[N,-1,F] + import edges → MeanSAGE ×2 → zS[N,32]                                     │
+ │ a = cos(zT,zS) → gate MLP([zT,zS,a]) → α,β (+ entropy reg.) → z = αzT + βzS           │
+ │ heads: risk(z) → BCE (pos_weight)   rank(z) → RankNet        inspection order: p / LOC│
+ │ loss = BCE + λc·InfoNCE(zT,zS) [+ λr·RankNet] − λg·H(α,β)                             │
+ └───────────────────────────────────────────┬───────────────────────────────────────────┘
+                                             ▼
+         compare_fair · effort_star · more_data · improve_star  (validation search → refit → single test)
+                                             ▼
+                  src/stats.py: bootstrap CI · paired bootstrap · Wilcoxon · Cliff's δ (+ Scott-Knott, step 6.2)
+                                             ▼
+         results/<phase>/<project>/ → analyse_star.py (figures) → app.py (Streamlit) → rapport/ (LaTeX)
 ```
 
-### 2.2 Target repository layout
+### 2.2 Final model (for the app and the report's headline)
+
+Chosen on **validation**, as the FICHE requires (STAR must be a component):
+
+- **Detection, AP:** STAR A5 with gate entropy, 10-seed ensemble. AP 0.802, equal to LR and RF within the CI.
+- **Effort-aware inspection:** the **STAR + LR + ET blend** inspected by score / LOC. Significantly better than LR (+0.008 Popt, p = 0.006). RF + density is reported as the strongest single baseline (Popt 0.750).
+
+Step 6.1 re-confirms this choice with one final run.
+
+### 2.3 Repository layout
 
 ```
 prioritest-star/
-├── ARCHITECTURE.md            ← this file
-├── README.md                  ← install + one command per experiment
+├── ARCHITECTURE.md                ← this file
 ├── FICHE / GUIDE / Contrastive.pdf / LIRE_EN_PREMIER.txt
-├── rapport/                   ← LaTeX + figures + compiled PDF
+├── rapport/                       ← LaTeX, figures, compiled PDF
 └── KIT_MULTI_PROJETS/
-    ├── requirements.txt       ← + streamlit, altair, joblib (pinned)
-    ├── configs/               ← one JSON per model (A1…A8, STAR-R, STAR-E, STAR-T) (NEW)
-    ├── data/                  ← untouched kit data
-    ├── src/
-    │   ├── model.py           ← + effort-aware rank head, LambdaRank, cold-start mask
-    │   ├── train.py           ← metrics (+ Popt, IFA, Recall@k LOC curve)
-    │   ├── data.py            ← (NEW) loaders for windows, temporal graphs, multi-project
-    │   └── stats.py           ← (NEW) significance + CIs
-    ├── run_star.py            ← ablations (now reads configs/, equal tuning budget)
-    ├── explore_val.py         ← validation-only search (now per variant)
-    ├── train_final.py         ← final protocol, single test pass
-    ├── analyse_star.py        ← figures + tables for the report
-    ├── app.py                 ← Streamlit
-    ├── tests/                 ← + test_data.py, test_stats.py, test_no_leakage.py
-    ├── notebooks/PRIORITEST_STAR_Colab.ipynb   ← runs everything end-to-end
-    └── results/               ← COMMITTED (small files) — numbers in the report must be reproducible
+    ├── README.md                  ← one command per experiment + CPU times
+    ├── requirements.txt           ← numpy, scipy, scikit-learn, torch, pandas, matplotlib, joblib, streamlit, altair
+    ├── data/                      ← kit data (unchanged)
+    ├── src/  model.py · train.py · stats.py · data.py (5.1)
+    ├── run_star.py · explore_val.py · train_final.py                       ← ablations, search, STAR-R
+    ├── compare_fair.py · effort_star.py · more_data.py · improve_star.py   ← Phases 1–4
+    ├── transfer_study.py (6.3) · domain_adapt.py (5.2) · final_model.py (6.1)
+    ├── analyse_star.py · app.py
+    ├── PHASE{1..4}_RESULTS.md · RESULTS_STAR_R.md
+    ├── tests/                     ← 30 tests (+ leakage tests, 6.4)
+    ├── notebooks/PRIORITEST_STAR_Colab.ipynb
+    └── results/                   ← committed; every number in the report comes from here
 ```
 
 ---
 
-## 3. Roadmap
+## 3. Completed phases (reference)
 
-Each step has: **goal · tasks · command · done when**. Phases are ordered by
-(1) what protects the validity of results, (2) what is most likely to improve them, (3) presentation.
-
-### Phase 0 — Consolidate the repo (½ day)
-
-**Goal:** one clean, pushed, reproducible baseline before any new experiment.
-
-- [ ] 0.1 Push the local folder (`prioritest-star-main`) to `mohamedaoui/prioritest-star` (commands in §6).
-- [x] 0.2 `.gitignore`: ignore `.venv/`, `__pycache__/`, `*.pyc`; **stop ignoring `results/`** (keep files < 5 MB; LFS or a release asset for bigger ones like `tabular_models.joblib`).
-- [x] 0.3 `requirements.txt`: add `streamlit`, `altair`, `joblib`; pin versions that were used (`pip freeze` from `.venv`).
-- [ ] 0.4 Remove duplicates: `Claude outputs/` vs `rapport/`, two copies of the PDF report, `to do.txt` (move to `docs/` or delete).
-- [ ] 0.5 Tag the current state: `git tag v0.1-star-r`.
-
-**Done when:** a fresh clone + `pip install -r requirements.txt` + `python -m unittest discover -s tests` passes, and `python train_final.py --project ant --groups 5 --ens 10` reproduces AP 0.799 ± 0.003.
-
----
-
-### Phase 1 — Make the comparison fair and statistically sound (1–2 days)
-
-**Goal:** every claim in the report backed by a CI or a test. This matters more than any +0.01 AP.
-
-- [x] 1.1 **Equal tuning budget.** *(done in `compare_fair.py`)* Run `explore_val.py` for **each** neural variant A2–A7 (same grid size, same seeds, same smoothed-epoch rule) and save `configs/A*.json`. Tabular baselines (HGB, LR, ET, RF) get a small grid on validation too.
-- [x] 1.2 **Re-run the ladder with tuned configs** *(done: `python compare_fair.py --project ant`, results in `PHASE1_RESULTS.md`)*, 10 seeds, refit train+val, single test pass:
-  `python run_star.py --project ant --seeds 42..51 --config-dir configs --improved`
-- [x] 1.3 `src/stats.py` *(done, + `tests/test_stats.py`; Scott-Knott still to add)*:
-  - class-level **bootstrap 95% CI** on test AP / Popt / Recall@20%LOC (2 000 resamples);
-  - **Wilcoxon signed-rank** over seeds between consecutive ablation steps (A_k vs A_{k-1});
-  - **Cliff's δ** effect size; **Scott-Knott ESD** ranking of all models.
-- [x] 1.4 Add strong, standard baselines *(done: LR, RF, ET, HGB, kNN-cosine)* to the table: **LR**, **Random Forest**, **HGB**, and a
-  **Rhazi-style kNN** baseline (cosine similarity on standardised metrics, Top-N weighted vote, N chosen on validation) — a cheap, honest proxy of the reference paper's decision rule.
-- [ ] 1.5 Test `tests/test_no_leakage.py`: assert the test file is never opened by `explore_val.py`; assert normalisation stats come from window 1 only; assert flag rate is computed from validation scores.
-
-**Command:** `python run_star.py … && python -m src.stats results/ant_tuned`
-**Done when:** the report's ablation table has mean ± std, 95% CI and a significance mark per step.
-
----
-
-### Phase 1 outcome (27 Nov 2026) — see `KIT_MULTI_PROJETS/PHASE1_RESULTS.md`
-
-- Under a fair protocol, A2–A6 all tie logistic regression on Ant 1.7 (AP ≈ 0.80, bootstrap CI ±0.07); no mechanism step is significant except RankNet, which is slightly harmful (p = 0.049).
-- RF / ExtraTrees are the best effort-aware models (Popt 0.75, R@20 % LOC 0.35–0.36 vs 0.71 / 0.30 for STAR).
-- Implications: Phase 2 must beat **RF + density**, not LR; Phase 3 (more data) is required before any mechanism can be shown to matter.
-
-### Phase 2 — Make effort-awareness native (main expected gain) (2–3 days)
-
-**Why:** today the model ranks by size (Popt 0.37 < random) and only becomes effort-aware through a post-hoc
-score/LOC sort. The FICHE's research question is *effort-sensitive ranking*. Training for it directly is the
-most promising lever.
-
-- [ ] 2.1 **Effort-aware rank head.** Score `s_i = rank(z_i) − γ·log LOC_i` with γ learnable (or fixed = 1). Inference ranks by `s_i` directly. Ablate γ = 0 / 1 / learned.
-- [ ] 2.2 **LambdaRank with ΔPopt gain.** Weight each (defective i, clean j) pair by |ΔPopt| obtained by swapping them in the current ranking (density-based). Compare to the existing `effort_aware_rank_loss`.
-- [ ] 2.3 **Target choice.** Also try ranking on *defect density* (`bug>0` / LOC) as the target of the rank head; keep BCE on the binary label.
-- [ ] 2.4 Add metrics: **Popt**, **IFA** (initial false alarms before the first defect), **Recall@{10,20,30,50}% LOC**, curve area — all from `src/train.py`.
-- [ ] 2.5 Select on **validation Popt** (not AP) for the effort-aware variants. Name the variant **STAR-E**.
-
-**Done when:** STAR-E Popt / Recall@20%LOC on Ant 1.7 is compared against STAR-R + post-hoc density and LR + density, with CIs. Expect a gain on effort metrics and possibly a small loss on AP: report both.
-
----
-
-### Phase 3 — Use more data: all nodes, temporal edges, other projects (3–4 days)
-
-**Why:** 118 training classes / 20 positives is the bottleneck for any neural model.
-
-- [ ] 3.1 **Cold-start nodes (fixes R5).** Load `_graph_temporal.npz`: build x[N_all, 3, F] with a presence **mask** (missing versions zeroed, mask fed to the TCN, Δ = 0 when absent). Train on all target-release nodes (Ant 1.5 window: 293 nodes instead of 118). Labels exist only for classes in the target CSV → mask the loss.
-  Evaluate **separately** on (a) strict-intersection classes (comparable to before) and (b) new classes.
-- [ ] 3.2 **Full graph.** Message passing on the complete import graph of the target release (more neighbours per node), not only on the intersection.
-- [ ] 3.3 **Spatio-temporal GNN (variant STAR-T).** Global graph = 3 version graphs + `temporal_edges_global`; GraphSAGE over spatial + temporal edges; read out nodes of the last version. Keep temporal edges past→present only (causal).
-- [ ] 3.4 **Cross-project pre-training (FICHE bonus).** Pre-train encoders on other projects' windows (Camel, POI, Xalan, Lucene, Synapse, Velocity, Xerces, Log4j — **never Ant**), per-project normalisation, then fine-tune on Ant 1.5 and select on Ant 1.6. Ablate: no pre-training / pre-training / pre-training + fine-tuning.
-- [ ] 3.5 Second study project: **Camel** (train 1.4 → test 1.6) and **POI** (2.5 → 3.0) with configs frozen from Ant (no tuning on their test). JEdit reported with bootstrap CI and the "5 positives" caveat.
-
-**Done when:** a table "data regime × model" (strict / +cold-start / +temporal graph / +pre-training) on Ant, plus Camel & POI transfer results.
-
----
-
-### Phase 4 — Improve the fusion / contrast (the GUIDE's required personal contribution) (1–2 days)
-
-Pick 1–2, implement, ablate against A6 with the Phase-1 protocol.
-
-- [ ] 4.1 **Label-aware InfoNCE done right**: mask same-label negatives (already coded) **plus** add supervised positives (other defective classes) with a small weight — a SupCon/InfoNCE hybrid. Report false-negative rate before/after.
-- [ ] 4.2 **Hard-negative mining** in InfoNCE: negatives sampled among structurally close but differently-labelled classes (graph neighbours).
-- [ ] 4.3 **Agreement-aware gating**: feed |zT − zS| and a learnable temperature on `a` to the gate; regularise α towards 0.5 when views agree (entropy penalty) to avoid the observed α≈0.66–0.72 collapse to the temporal view.
-- [ ] 4.4 **Multi-task stability**: auxiliary head predicting Δmetrics (churn) of the target release from the history — self-supervision with no label leakage.
-
-**Done when:** one improvement shows a significant (Wilcoxon p < 0.05) gain on at least one primary metric, or a clearly documented null result.
-
----
-
-### Phase 5 — Analysis & explanation (1–2 days)
-
-- [ ] 5.1 Budget–recall curves for all final models (risk order and density order), with CI bands.
-- [ ] 5.2 α/β and cos(zT,zS) distributions: defective vs clean, correct vs wrong, historically unstable (large |Δ|) vs highly coupled (high CBO / in-degree).
-- [ ] 5.3 Error analysis: top false positives (large, coupled classes) vs missed defects (small, bland metrics) — already started; add per-feature SHAP on LR/HGB to explain *why*.
-- [ ] 5.4 Graph contribution: performance by node degree bucket (isolated / low / high degree).
-- [ ] 5.5 Selection-bias study (from 3.1): new classes vs old classes — defect rate, model recall.
-
----
-
-### Phase 6 — Application (½–1 day)
-
-- [ ] 6.1 `app.py`: project selector (Ant / Camel / POI / JEdit), model selector (A1, LR, STAR-R, STAR-E), budget slider, Top-k table with metrics, α/β and agreement per class, budget–recall curve, "why ranked here" panel (top metric deviations).
-- [ ] 6.2 Load from `results/` only (no training in the app). Add `streamlit run app.py` to README and a screenshot to the report.
-
----
-
-### Phase 7 — Reproducibility & deliverables (1 day)
-
-- [ ] 7.1 README: one command per experiment (baseline, ablations, search, final, analysis, app) with measured CPU time.
-- [ ] 7.2 Notebook: clone → install → tests → ablations → STAR-R → STAR-E → analysis → zip results.
-- [ ] 7.3 `configs/` complete; every result folder contains the config + git commit hash + seeds + times (`metrics.json`).
-- [ ] 7.4 CI (GitHub Actions): unit tests + a 2-epoch smoke run on CPU.
-- [ ] 7.5 Checkpoints for final models in `results/` (or GitHub release if > 50 MB).
-
----
-
-### Phase 8 — Report (2–3 days, in parallel with 5–7)
-
-Update `rapport/rapport_prioritest_star.tex` chapter by chapter:
-
-| Chapter | To add / fix |
-|---|---|
-| Résumé / Abstract | final numbers with CIs; honest headline (STAR-R ≈ strong LR on Ant; gains on effort metrics if Phase 2 confirms) |
-| État de l'art | Rhazi et al. critical reading (weighted F1, random split, no effort metrics, Top-N); SAINT, FT-Transformer, bjCnet, DP-CCL; effort-aware SDP (Kamei 2013, Mende & Koschke 2010); TCN; GraphSAGE; InfoNCE/SupCon |
-| Architecture | STAR-E / STAR-T diagrams, losses with equations |
-| Données | cold-start counts, graph coverage, prevalence shift table |
-| Expérimentations | tuned ablation ladder + stats; data-regime table; Camel/POI transfer |
-| Analyse | Phase 5 figures |
-| Limites | R1, R4, R5, small N, JEdit, single main project |
-| Perspectives | prospective (t → t+1) protocol with label-availability audit; richer dependency extraction |
-
----
-
-## 4. Experiment matrix (what goes in the final tables)
-
-| ID | Model | Data regime | Selected on | Main metrics |
-|---|---|---|---|---|
-| B1–B4 | HGB, LR, RF, kNN-cosine (Rhazi-style) | strict | val AP | AP, Popt, R@20%LOC |
-| A2–A6 | ablation ladder (tuned) | strict | val AP | AP, ROC-AUC, MCC, R@20% |
-| A7 | STAR+ | strict | val AP | idem |
-| STAR-R | 10-seed ensemble + val-chosen blend | strict | val AP | all |
-| STAR-E | effort-aware rank head / LambdaRank | strict | val Popt | Popt, R@20%LOC, IFA |
-| STAR-C | STAR-R/E + cold-start nodes | all nodes | val | split old/new classes |
-| STAR-T | spatio-temporal GNN | all nodes + temporal edges | val | all |
-| STAR-P | + cross-project pre-training | other projects → Ant | val | all |
-| X-Camel / X-POI | frozen configs transferred | 2-window projects | none (fixed) | exploratory |
-
-All with ≥ 10 seeds (or 5 groups × 10-seed ensembles), mean ± std, bootstrap CI, Wilcoxon vs the previous row.
-
----
-
-## 5. Timeline (suggested)
-
-| Week | Phases | Milestone (FICHE §10) |
+| Phase | Done | Command |
 |---|---|---|
-| W1 | 0, 1 | Data + first models reproducible, no leakage, fair baselines |
-| W2 | 2, 4 | STAR-E + personal improvement, ablations complete |
-| W3 | 3 | More data: cold-start, temporal graph, pre-training, Camel/POI |
-| W4 | 5, 6, 7 | Analysis, app, reproducibility |
-| W5 | 8 | Report + defence slides |
+| 0 Consolidation | `.gitignore` keeps results and drops `.venv`; requirements completed; STAR-R reproduced (AP 0.798) | — |
+| 1 Fair comparison | equal-budget search for A1–A7 + LR/RF/ET/HGB/kNN, bootstrap and Wilcoxon | `python compare_fair.py --project ant` (6.5 min) |
+| 2 STAR-E | effort term inside the model, 3 variants | `python effort_star.py --project ant` (4 min) |
+| 3 More data | cross-project zero-shot / joint / pre-train, STAR vs LR / RF | `python more_data.py --project ant` (4 min) |
+| 4 Improvement | C1, C2, G1, G2, C2G1 vs A5 | `python improve_star.py --project ant` (5 min) |
+
+Run Phase 1 before Phases 2 and 3, which read `results/phase1/`.
 
 ---
 
-## 6. Pushing the local folder to GitHub (Phase 0.1)
+## 4. Remaining roadmap
 
-Run in PowerShell from `C:\Users\ayman\OneDrive\Desktop\prioritest-star-main` (the folder is not a git repo yet):
+Ordered by **expected value for the defence**. Each step lists the goal, what to do, and when it counts as done.
+
+### Phase 5 — The experiments most likely to change the conclusions (3–4 days)
+
+- [ ] **5.1 `src/data.py`.** One loader for strict windows, temporal-graph files and multi-project cohorts, with a project/domain id per cohort. Refactor the four phase scripts onto it; no change in results (check against the committed `results/`).
+- [ ] **5.2 Domain adaptation (follow-up to Phase 3).** STAR is the model that transfers best, so make cross-project data actually help:
+  - per-project normalisation layers (domain-specific BatchNorm/LayerNorm statistics);
+  - **source-window weighting** by similarity to the target (MMD on metric distributions, computed on train features only);
+  - optional adversarial project discriminator (gradient reversal) on z.
+  - Select on Ant 1.6 and test once. **Done when** joint STAR is compared with Ant-only STAR with a CI. Success = ΔAP > 0 with a CI excluding 0.
+- [ ] **5.3 Cold-start classes (R5).** Add `PROMISE-dataset-main.zip`, rerun `prepare_multi.py` and also export labels for the classes outside the strict window. Train with a presence mask (missing releases zeroed, mask fed to the TCN), then evaluate separately on old and new classes. **Done when** the report has a "selection bias" table: defect rate and recall for new vs old classes.
+- [ ] **5.4 Give STAR the trees' strength (follow-up to Phase 2).** RF wins on effort ranking through feature interactions, so:
+  - (a) **distil** out-of-fold RF probabilities into STAR's risk head as a soft target;
+  - (b) add a **third view**, a tabular MLP on [last metrics, Δ], into the similarity-guided gate.
+  - Same protocol. **Done when** both are tested against RF + density on Popt.
+
+### Phase 6 — Robustness of the claims (2 days)
+
+- [ ] **6.1 `final_model.py`.** Freeze the final choice of §2.2 on validation and run it once with 10 seeds. Save the checkpoints plus the blend, and regenerate `results/analysis/` and the app's data from it.
+- [ ] **6.2 Scott-Knott ESD** ranking of all models (Phase 1 table) in `src/stats.py`, as in the SDP literature.
+- [ ] **6.3 Second and third target projects.** `transfer_study.py` runs the Phase-1 protocol with **configurations frozen from Ant** (no tuning on the new test) on:
+  - **Camel** 1.4 → 1.6 (565 test classes, 127 defective; a bigger test set gives tighter CIs);
+  - **POI** 2.5 → 3.0.
+  - **JEdit** is reported with its bootstrap CI and the 5-positive caveat.
+  - **Done when** the claims "STAR ≈ LR", "trees win Popt" and "STAR robust to mixing" are checked on ≥ 2 projects.
+- [ ] **6.4 Leakage tests** (`tests/test_no_leakage.py`):
+  - the search code never opens the test file (monkeypatch `np.load`);
+  - normalisation statistics come from window 1 only;
+  - the flag rate and the blend are computed from validation scores only.
+
+### Phase 7 — Analysis & application (2 days)
+
+- [ ] 7.1 Budget–recall curves with CI bands for: LR, RF, STAR A5, the blend, and the random and oracle orderings.
+- [ ] 7.2 α / β and cos(zT, zS), with and without gate entropy, broken down by defective vs clean, correct vs wrong, unstable (large |Δ|) vs highly coupled (high CBO / in-degree).
+- [ ] 7.3 Performance by node-degree bucket: isolated (37 % of Ant classes), low, high. This shows where the graph *could* help.
+- [ ] 7.4 Error analysis plus SHAP on RF/LR: false positives are large coupled classes; missed defects are small, bland classes.
+- [ ] 7.5 `app.py`:
+  - selectors for project and model (LR, RF, STAR, blend) and for risk vs density ordering, plus a LOC budget slider;
+  - a per-class panel showing α / β, agreement and the top metric deviations;
+  - the app loads `results/` only.
+
+### Phase 8 — Deliverables (2–3 days, in parallel)
+
+- [ ] 8.1 Colab notebook runs everything end to end: tests → Phases 1–4 → final model → analysis → zip.
+- [ ] 8.2 GitHub Actions: unit tests + 2-epoch smoke runs of each phase script.
+- [ ] 8.3 Report update:
+
+| Chapter | Content to add |
+|---|---|
+| Résumé / Abstract | Headline per §1.2: STAR ≈ strong linear / tree baselines on Ant; robust to cross-project data; useful in a blend for effort ranking |
+| État de l'art | Critical reading of Rhazi et al. (weighted F1, random split, no effort metrics, Top-N); SAINT, FT-Transformer, bjCnet, DP-CCL; effort-aware SDP (Kamei 2013, Mende & Koschke 2010); cross-project SDP; TCN, GraphSAGE, InfoNCE / SupCon |
+| Architecture | Final model (§2.2), loss equations, gate entropy, STAR-E |
+| Données | Windows, coverage, prevalence shift (17 % → 35 %), the 37 % isolated nodes, cross-project pool |
+| Expérimentations | Phase 1 table with CIs and tests; Phases 2–4 as documented null / positive results; Camel / POI transfer |
+| Analyse | Phase 7 figures |
+| Limites | R1, R4, R5, one main project, one test release, CI width |
+| Perspectives | Steps 5.2–5.4 not yet done; prospective t → t+1 protocol with a label-availability audit; richer dependency extraction |
+
+- [ ] 8.4 Defence slides: problem → protocol → 4 findings → app demo → limits.
+
+---
+
+## 5. Timeline
+
+| Week | Work | FICHE §10 milestone |
+|---|---|---|
+| W1 (done) | Phases 0–4 | Data, baselines, STAR, ablations, protocol without leakage |
+| W2 | 5.1, 5.2, 5.4 | Experiments that can change the conclusions |
+| W3 | 5.3 (if archive), 6.1–6.4 | Robust, multi-project claims |
+| W4 | 7, 8.1–8.2 | Explorable Top-k, figures, reproducibility |
+| W5 | 8.3–8.4 | Report and defence |
+
+---
+
+## 6. Pushing to GitHub
+
+The repo is `mohamedaoui/prioritest-star`. For Claude to push, the **Claude GitHub App must be installed on the `mohamedaoui` account** (https://github.com/apps/claude/installations/select_target). Otherwise, run this from `C:\Users\ayman\OneDrive\Desktop\prioritest-star-main` in PowerShell:
 
 ```powershell
 git init -b main
 git remote add origin https://github.com/mohamedaoui/prioritest-star.git
 git fetch origin main
-git reset origin/main          # adopt GitHub history, keep your local files as changes
-git status                     # check .venv/ and __pycache__/ are NOT listed
+git reset origin/main          # adopt GitHub history, keep local files as changes
+git status                     # .venv/ and __pycache__/ must NOT be listed
 git add -A
-git commit -m "STAR-R final training, validation search, analysis, Streamlit app, report, roadmap"
+git commit -m "Phases 0-4: fair comparison, STAR-E, cross-project, fusion/contrast improvements, roadmap v2"
 git push origin main
 ```
 
 ---
 
-## 7. Definition of "best possible result" for this project
+## 7. What "the best possible result" means here
 
-Per the FICHE, success = **correct reproduction + leak-free protocol + interpretable ablations**, not a record score.
-The strongest defensible outcome is therefore:
+The FICHE grades **correct reproduction, a leak-free protocol and interpretable ablations**, not a record score
+("aucune performance minimale n'est garantie"). The strongest defensible outcome is therefore:
 
-1. A fair, tuned, significance-tested ablation showing **which** mechanism helps (or doesn't).
-2. A **native effort-aware** model that beats LR + post-hoc density on Popt / Recall@20%LOC with a CI that excludes zero — this is where STAR can add something a linear model can't.
-3. Evidence that **more data** (cold-start nodes, temporal graph, cross-project pre-training) is what unlocks the graph and contrastive parts.
-4. An honest report: if LR still ties, that is a result, explained by data size and metric redundancy.
+1. A fair, equal-budget, significance-tested ablation showing that, on Ant, **no STAR mechanism gives a measurable gain**, with the reason: 118 training classes and a test CI of ± 0.07. *(done)*
+2. The **positive STAR-specific findings**: robustness to cross-project data, and a significant gain over LR on effort ranking when blended. *(done; to confirm on Camel / POI in 6.3)*
+3. One more serious attempt to make STAR's design pay off (5.2 domain adaptation, 5.4 tree distillation / third view), reported whatever the outcome.
+4. A clear app and report that never overclaim (R1, R4, R5).
