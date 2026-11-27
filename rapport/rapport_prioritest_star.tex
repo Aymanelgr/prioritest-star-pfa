@@ -125,41 +125,7 @@ spatio-temporelles, fusion guidée par similarité et apprentissage contrastif d
 \vfill
 \end{titlepage}
 
-% ------------------------------------------------------------ Abstract
 \pagenumbering{roman}
-\chapter*{Abstract}
-\addcontentsline{toc}{chapter}{Abstract}
-\markboth{Abstract}{}
-\begin{otherlanguage}{english}
-Testing budgets are limited, so teams must decide which classes to inspect first.
-PRIORITEST-STAR ranks the Java classes of a release by their risk of containing a defect.
-Each class is described by two views: a \emph{temporal} view (20 object-oriented and size metrics over three
-successive releases, encoded by a causal temporal convolutional network) and a \emph{structural} view
-(the graph of explicit Java imports, encoded by a compact two-layer GraphSAGE).
-The cosine agreement between the two views guides their fusion, and the model is trained with a binary
-cross-entropy loss, a cross-view InfoNCE contrastive loss and a pairwise RankNet loss.
-
-We evaluate on the PROMISE Ant project with a strict chronological protocol (train on release~1.5, validate on~1.6,
-test once on~1.7), several random seeds and effort-aware metrics. An audit of the provided pipeline found no label
-leakage but identified a very small training set and a shift in defect prevalence. We therefore propose
-\textbf{STAR-R}, a variance-reduced training procedure: a validation-only hyperparameter search with seed-averaged
-early stopping, a 10-seed ensemble, refitting on train and validation, and a validation-selected blend with two
-tabular models. We then compare every model under an equal, validation-only tuning budget, with 10 seeds,
-class-bootstrap confidence intervals and paired tests, and extend the study to the Camel, POI and JEdit projects.
-
-On the untouched Ant test release, STAR-R reaches an average precision of $0.799\pm0.003$, an accuracy of
-$0.823\pm0.004$ (majority baseline $0.651$), an F1-score of $0.745$ and an MCC of $0.610$, compared with
-$0.760\pm0.024$ AP and $0.751$ accuracy for the original model. Under equal tuning, however, no STAR mechanism gives
-a significant gain on Ant: all variants tie a regularised logistic regression (AP $\approx0.80$, 95\,\% CI about
-$\pm0.07$). The picture differs on Camel, the largest test release (565 classes): tuned on its own training release,
-STAR with the import graph beats logistic regression by about $+0.09$ AP ($p\le0.01$). Across projects, STAR makes
-better use of training data pooled from other projects than a linear model, and the RankNet loss consistently hurts.
-Ranking classes by risk per line of code, instead of raw risk, finds 2.5 times more defects at a 20\,\% code-inspection
-budget on Ant. A Streamlit application lets testers explore the prioritised list.
-
-\medskip\noindent\textbf{Keywords:} software defect prediction, test prioritisation, temporal convolutional network,
-GraphSAGE, contrastive learning, learning to rank, effort-aware evaluation.
-\end{otherlanguage}
 
 % ------------------------------------------------------------ Résumé
 \chapter*{Résumé}
