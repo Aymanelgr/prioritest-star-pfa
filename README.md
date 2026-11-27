@@ -1,175 +1,198 @@
 # PRIORITEST-STAR
 
-**Which Java classes should a tester inspect first, when there is only time to read a fraction of the code?**
+**Quelles classes Java un testeur doit-il inspecter en premier, quand il n'a le temps de lire qu'une partie du code ?**
 
-PRIORITEST-STAR is a deep-learning model that ranks the classes of a Java project by their risk of containing a defect.
-Inspecting the top of the ranking finds as many defects as possible within a fixed inspection budget, measured in lines of code.
-It is the PFA (capstone) project of the 5th-year Data & AI track at EMSI Marrakech.
+PRIORITEST-STAR est un modèle d'apprentissage profond qui classe les classes d'un projet Java selon leur risque de
+contenir un défaut. En inspectant le haut du classement, on trouve le plus de défauts possible avec un budget
+d'inspection fixé, mesuré en lignes de code.
+C'est le projet PFA (capstone) de 5e année, option Data & IA, à l'EMSI Marrakech.
 
-> Master plan and progress: [`ARCHITECTURE.md`](ARCHITECTURE.md) · Detailed results: `KIT_MULTI_PROJETS/*RESULTS*.md`
+> Plan directeur et avancement : [`ARCHITECTURE.md`](ARCHITECTURE.md) · Résultats détaillés : `KIT_MULTI_PROJETS/*RESULTS*.md`
+> · Rapport : `rapport/rapport_prioritest_star.pdf`
 
 ---
 
-## 1. The problem in plain words
+## 1. Le problème, simplement
 
-Testing and code review are expensive, and teams never have time to inspect everything.
-**Software defect prediction** uses measurements of the code to guess which parts are likely to be buggy, so effort goes there first.
+Tester et relire du code coûte cher, et une équipe n'a jamais le temps de tout inspecter.
+La **prédiction de défauts** utilise des mesures du code pour deviner quelles parties ont le plus de chances d'être
+défectueuses, afin d'y consacrer l'effort en priorité.
 
-Two things make this project more demanding than a plain "buggy / not buggy" classifier:
+Deux choses rendent ce projet plus exigeant qu'un simple classifieur « défectueuse / saine » :
 
-1. **It is a ranking problem under a budget.** Big classes are more often buggy, but they also cost more to read. A useful model must find many defects *per line inspected*, not only many defects. This is called **effort-aware** evaluation.
-2. **Code has history and structure.** A class is not an isolated row in a table. It evolves across releases (its *history*) and it imports other classes (its *dependencies*). STAR tries to use both.
+1. **C'est un problème de classement sous budget.** Les grandes classes sont plus souvent défectueuses, mais elles
+   coûtent aussi plus cher à lire. Un bon modèle doit trouver beaucoup de défauts *par ligne inspectée*, pas seulement
+   beaucoup de défauts. C'est l'évaluation **sensible à l'effort**.
+2. **Le code a une histoire et une structure.** Une classe n'est pas une ligne isolée dans un tableau. Elle évolue
+   d'une version à l'autre (son *historique*) et elle importe d'autres classes (ses *dépendances*). STAR cherche à
+   exploiter les deux.
 
-## 2. The data
+## 2. Les données
 
-The data is the **PROMISE** benchmark: open-source Java projects (Ant, Camel, POI, JEdit, Xalan…) measured over several releases.
+Les données proviennent du jeu **PROMISE** : des projets Java open source (Ant, Camel, POI, JEdit, Xalan…) mesurés sur
+plusieurs versions.
 
-| Element | Meaning |
+| Élément | Signification |
 |---|---|
-| **20 metrics per class** | Classic object-oriented measures: size (LOC), complexity (WMC, max_cc), coupling (CBO, Ca, Ce, RFC), cohesion (LCOM, CAM), inheritance (DIT, NOC)… |
-| **Window of 3 releases** | For a *target* release t, the metrics of the same class at t−2, t−1 and t, giving a tensor `X[N, 3, 20]`. Only classes present in all 3 releases are kept. |
-| **Label** | 1 if the class has at least one recorded bug in release t. |
-| **Import graph** | An edge A → B when class A imports class B in release t. It is extracted from the source code and is a *partial* view of the real dependencies. |
-| **LOC** | Lines of code of each class, used as the inspection cost. |
+| **20 métriques par classe** | Mesures orientées objet classiques : taille (LOC), complexité (WMC, max_cc), couplage (CBO, Ca, Ce, RFC), cohésion (LCOM, CAM), héritage (DIT, NOC)… |
+| **Fenêtre de 3 versions** | Pour une version *cible* t, les métriques de la même classe en t−2, t−1 et t, d'où un tenseur `X[N, 3, 20]`. Seules les classes présentes dans les 3 versions sont gardées. |
+| **Label** | 1 si la classe a au moins un défaut enregistré dans la version t. |
+| **Graphe d'imports** | Une arête A → B quand la classe A importe la classe B dans la version t. Il est extrait du code source et ne donne qu'une vue *partielle* des dépendances réelles. |
+| **LOC** | Nombre de lignes de code de chaque classe, utilisé comme coût d'inspection. |
 
-The protocol is **chronological**. On Ant, the model is trained on release 1.5, settings are chosen on 1.6, and it is tested **once** on 1.7.
-The model *detects* defects in the observed release; it does **not** predict the next release (rule R1 in `ARCHITECTURE.md`).
+Le protocole est **chronologique**. Sur Ant, le modèle est entraîné sur la version 1.5, les réglages sont choisis sur
+la 1.6, et il est testé **une seule fois** sur la 1.7.
+Le modèle *détecte* les défauts de la version observée ; il ne **prédit pas** la version suivante (règle R1 de
+`ARCHITECTURE.md`).
 
-## 3. The model: STAR
+## 3. Le modèle : STAR
 
 ```
- metrics over 3 releases ──► causal TCN ───────────────► zT  (temporal view: how the class evolved)
+ métriques sur 3 versions ──► TCN causal ──────────────► zT  (vue temporelle : comment la classe a évolué)
                                                             │
- metrics of release t + import graph ──► GraphSAGE ────► zS  (structural view: where the class sits)
+ métriques de la version t + graphe d'imports ──► GraphSAGE ──► zS  (vue structurelle : où se situe la classe)
                                                             │
-                     a = cos(zT, zS)   ◄── how much the two views agree
-                     (α, β) = softmax(MLP[zT, zS, a])        similarity-guided fusion
+                     a = cos(zT, zS)   ◄── degré d'accord entre les deux vues
+                     (α, β) = softmax(MLP[zT, zS, a])        fusion guidée par la similarité
                      z = α·zT + β·zS
                                                             │
-             risk head ─► defect probability (BCE loss)     rank head ─► pairwise ranking (RankNet loss)
+     tête de risque ─► probabilité de défaut (perte BCE)     tête de classement ─► classement par paires (RankNet)
 ```
 
-| Block | What it does | Why |
+| Bloc | Rôle | Pourquoi |
 |---|---|---|
-| **Causal TCN** (temporal convolution, kernel 2, dilations 1 and 2) | Reads the 3 releases in order, never looking ahead | Unstable or growing classes are riskier |
-| **GraphSAGE** (2 mean-aggregation layers) | Mixes each class with the classes it imports | Coupling and position in the architecture |
-| **Similarity-guided fusion** | Weighs the two views using their agreement cos(zT, zS) | Trust a view more when the two agree |
-| **Cross-view InfoNCE** (contrastive loss) | Pulls zT and zS of the *same* class together, pushes other classes apart | Aligns the two views |
-| **RankNet** | Learns that a defective class should score above a clean one | The final goal is a ranking |
+| **TCN causal** (convolution temporelle, noyau 2, dilatations 1 et 2) | Lit les 3 versions dans l'ordre, sans jamais regarder vers l'avant | Les classes instables ou en croissance sont plus risquées |
+| **GraphSAGE** (2 couches d'agrégation par moyenne) | Combine chaque classe avec les classes qu'elle importe | Couplage et position dans l'architecture |
+| **Fusion guidée par la similarité** | Pondère les deux vues selon leur accord cos(zT, zS) | Faire davantage confiance à une vue quand les deux concordent |
+| **InfoNCE inter-vues** (perte contrastive) | Rapproche zT et zS d'une *même* classe, éloigne les autres classes | Aligne les deux vues |
+| **RankNet** | Apprend qu'une classe défectueuse doit être mieux notée qu'une classe saine | Le but final est un classement |
 
-Total loss: `BCE + λc·InfoNCE + λr·RankNet` (+ an optional gate-entropy term that keeps both views in use).
+Perte totale : `BCE + λc·InfoNCE + λr·RankNet`, plus éventuellement un terme d'entropie de la porte qui maintient les
+deux vues en usage.
 
-**Positioning.** Rhazi et al. (2026, *Science of Computer Programming*) learn similarities *between different classes* with inter-sample attention and a kNN vote. STAR borrows the idea of learning similarities, but between *two views of the same class*. It is not a reproduction of that paper.
+**Positionnement.** Rhazi et al. (2026, *Science of Computer Programming*) apprennent des similarités *entre classes
+différentes* avec une attention inter-échantillons et un vote des plus proches voisins. STAR reprend l'idée
+d'apprendre des similarités, mais entre *deux vues d'une même classe*. Ce n'est pas une reproduction de cet article.
 
-## 4. How results are measured
+## 4. Comment les résultats sont mesurés
 
-| Metric | Question it answers |
+| Métrique | Question à laquelle elle répond |
 |---|---|
-| **AP** (average precision) | How well are defective classes ranked above clean ones? (main detection metric) |
-| ROC-AUC | Same idea, less sensitive to the defect rate |
-| **Popt** | Area under the "defects found vs % of code inspected" curve, normalised: 1 = perfect, 0.5 ≈ random, 0 = worst |
-| **Recall@20 % LOC** | Share of defects found after reading 20 % of the lines of code |
-| IFA | Clean classes inspected before the first defect |
+| **AP** (précision moyenne) | Les classes défectueuses sont-elles bien classées au-dessus des saines ? (métrique principale de détection) |
+| ROC-AUC | Même idée, moins sensible à la proportion de défauts |
+| **Popt** | Aire sous la courbe « défauts trouvés en fonction du % de code inspecté », normalisée : 1 = parfait, 0,5 ≈ hasard, 0 = pire cas |
+| **Recall@20 % LOC** | Part des défauts trouvés après avoir lu 20 % des lignes de code |
+| IFA | Nombre de classes saines inspectées avant le premier défaut |
 
-For the effort metrics, classes are inspected in order of **risk ÷ LOC** (risk per line).
+Pour les métriques d'effort, les classes sont inspectées par ordre de **risque ÷ LOC** (risque par ligne).
 
-Every number is reported as a **mean ± std over 10 seeds** with a **95 % bootstrap confidence interval**, and models are compared with **paired statistical tests**.
-Nothing is tuned on the test release: four automated tests check this (`tests/test_no_leakage.py`).
+Chaque chiffre est donné en **moyenne ± écart-type sur 10 graines**, avec un **intervalle de confiance à 95 % par
+bootstrap**, et les modèles sont comparés par des **tests statistiques appariés**.
+Rien n'est réglé sur la version de test : quatre tests automatiques le vérifient (`tests/test_no_leakage.py`).
 
-## 5. What was found
+## 5. Ce qui a été trouvé
 
-| Study | Result |
+| Étude | Résultat |
 |---|---|
-| **Ablation on Ant** (Phase 1) | Each STAR mechanism was added one at a time, with the same tuning budget for every variant. **None gives a significant gain on Ant**: all variants tie logistic regression (AP ≈ 0.80). Random Forest / ExtraTrees are the best effort-aware models (Popt 0.75). |
-| **Effort learned inside the model** (Phase 2) | No gain. The model converges to the simple "risk ÷ LOC" rule. |
-| **Training with 9 other projects** (Phase 3) | Does not help Ant (projects differ), but **STAR copes with mixed data better than a linear model**. |
-| **Improvements to fusion / contrast** (Phase 4) | Label-aware and supervised contrastive losses: neutral. **Gate entropy** balances the two views at no cost (kept). |
-| **Other projects** (step 6.3) | **On Camel, STAR with the graph beats logistic regression significantly (+0.066 AP)**. On POI, STAR trained with cross-project data is the best model (AP 0.920). JEdit's test release has only 5 defects and is uninformative. |
-| **Why the graph helps on Camel** (step 7.3) | On Camel, isolated classes are almost never defective (1.3 % vs 26 % for connected ones). The graph captures this; on Ant the contrast is weak (×1.7 vs ×20). |
+| **Ablation sur Ant** (phase 1) | Chaque mécanisme de STAR a été ajouté un par un, avec le même budget de réglage pour chaque variante. **Aucun n'apporte de gain significatif sur Ant** : toutes les variantes font jeu égal avec la régression logistique (AP ≈ 0,80). Random Forest et ExtraTrees sont les meilleurs modèles sensibles à l'effort (Popt 0,75). |
+| **Effort appris dans le modèle** (phase 2) | Aucun gain. Le modèle converge vers la règle simple « risque ÷ LOC ». |
+| **Entraînement avec 9 autres projets** (phase 3) | N'aide pas Ant (les projets diffèrent), mais **STAR supporte bien mieux les données mélangées qu'un modèle linéaire**. |
+| **Améliorations de la fusion / du contraste** (phase 4) | Pertes contrastives sans faux négatifs et supervisées : neutres. **L'entropie de la porte** équilibre les deux vues sans coût (retenue). |
+| **Autres projets** (étape 6.3) | **Sur Camel, STAR avec le graphe bat significativement la régression logistique (+0,066 d'AP)**. Sur POI, STAR entraîné avec des données d'autres projets est le meilleur modèle (AP 0,920). La version de test de JEdit n'a que 5 défauts et n'est pas interprétable. |
+| **Réglage sur les données du projet** (étape 5.5, Camel) | Tous les réseaux progressent ; STAR bat alors la régression logistique d'environ **+0,09 d'AP** (p ≤ 0,01). RankNet dégrade de nouveau les résultats. POI reste à exécuter. |
+| **Pourquoi le graphe aide sur Camel** (étape 7.3) | Sur Camel, les classes isolées ne sont presque jamais défectueuses (1,3 % contre 26 % pour les connectées). Le graphe capte ce signal ; sur Ant, le contraste est faible (×1,7 contre ×20). |
 
-**Take-away.** STAR's value is **project-dependent**:
-- the structural view pays off when connectivity separates risky from safe classes (Camel);
-- the model makes better use of cross-project data than a linear model;
-- blended with simple tabular models, it improves effort-aware ranking (Ant, Camel).
+**À retenir.** La valeur de STAR **dépend du projet** :
+- la vue structurelle est rentable quand la connectivité sépare les classes risquées des classes sûres (Camel) ;
+- le modèle exploite mieux qu'un modèle linéaire les données d'autres projets ;
+- combiné à des modèles tabulaires simples, il améliore le classement sensible à l'effort (Ant, Camel).
 
-On a small project like Ant (118 training classes), simple models are just as good. That is reported honestly rather than hidden.
+Sur un petit projet comme Ant (118 classes d'entraînement), des modèles simples font aussi bien. C'est présenté
+honnêtement plutôt que caché.
 
-## 6. Repository map
+## 6. Plan du dépôt
 
 ```
-ARCHITECTURE.md              master plan: rules, status, architecture, remaining steps
-README.md                    this file
-rapport/                     LaTeX report (+ PDF, figures)
-FICHE / GUIDE / LIRE_EN_PREMIER   assignment documents from the supervisor
+ARCHITECTURE.md              plan directeur : règles, avancement, architecture, étapes restantes
+README.md                    ce fichier
+rapport/                     rapport LaTeX (+ PDF, figures)
+FICHE / GUIDE / LIRE_EN_PREMIER   documents du sujet fournis par l'encadrant
 KIT_MULTI_PROJETS/
-├── data/                    PROMISE windows (.npz) for 10 projects + temporal graphs + manifests
-├── prepare_multi.py         rebuilds data/ from the PROMISE archive
-├── src/model.py             STAR: TCN, GraphSAGE, fusion gate, InfoNCE / SupCon, RankNet, gate entropy
-├── src/train.py             data loading and metrics (AP, Recall@LOC, accuracy/MCC with validation-chosen threshold)
-├── src/stats.py             Popt, IFA, bootstrap CIs, paired bootstrap, Wilcoxon, Cliff's δ
-├── run_star.py              ablation ladder A1–A8 (one mechanism per step)
-├── explore_val.py           hyper-parameter search on the validation release only
-├── train_final.py           STAR-R: 10-seed ensemble + blend chosen on validation, single test pass
-├── compare_fair.py          Phase 1  — fair, equally tuned comparison with statistics
-├── effort_star.py           Phase 2  — STAR-E, effort term learned in the model
-├── more_data.py             Phase 3  — cross-project training
-├── improve_star.py          Phase 4  — fusion / contrast improvements
-├── transfer_study.py        Step 6.3 — Camel, POI, JEdit with settings frozen from Ant
-├── graph_analysis.py        Step 7.3 — graph statistics and where the graph helps
-├── analyse_star.py          figures: budget–recall curve, fusion weights, ranked class list
-├── app.py                   Streamlit app: explore the Top-k classes under a LOC budget
-├── tests/                   34 unit tests (model, metrics, statistics, no-leakage)
-├── notebooks/               Google Colab notebook
-├── results/                 every number of the report (json / csv / checkpoints)
-└── *_RESULTS.md, GRAPH_ANALYSIS.md   one write-up per study
+├── data/                    fenêtres PROMISE (.npz) de 10 projets + graphes temporels + manifestes
+├── prepare_multi.py         reconstruit data/ à partir de l'archive PROMISE
+├── src/model.py             STAR : TCN, GraphSAGE, porte de fusion, InfoNCE / contraste supervisé, RankNet, entropie de la porte
+├── src/train.py             chargement des données et métriques (AP, Recall@LOC, accuracy/MCC avec seuil choisi sur la validation)
+├── src/stats.py             Popt, IFA, IC par bootstrap, bootstrap apparié, Wilcoxon, delta de Cliff, Scott-Knott ESD
+├── run_star.py              ablations A1–A8 (un mécanisme par étape)
+├── explore_val.py           recherche d'hyperparamètres sur la seule version de validation
+├── train_final.py           STAR-R : ensemble de 10 graines + mélange choisi sur la validation, test unique
+├── compare_fair.py          phase 1  — comparaison équitable, à réglage égal, avec statistiques
+├── effort_star.py           phase 2  — STAR-E, terme d'effort appris dans le modèle
+├── more_data.py             phase 3  — entraînement inter-projets
+├── improve_star.py          phase 4  — améliorations de la fusion / du contraste
+├── transfer_study.py        étape 6.3 — Camel, POI, JEdit avec réglages figés depuis Ant
+├── retune_project.py        étape 5.5 — réglage à l'intérieur de la version d'entraînement de chaque projet
+├── graph_analysis.py        étape 7.3 — statistiques des graphes et apport du graphe
+├── sk_rank.py               étape 6.2 — classement Scott-Knott ESD (à exécuter)
+├── analyse_star.py          figures : courbe effort–rappel, poids de fusion, liste priorisée
+├── app.py                   application Streamlit : explorer le Top-k sous un budget en LOC
+├── tests/                   36 tests unitaires (modèle, métriques, statistiques, absence de fuite)
+├── notebooks/               notebook Google Colab
+├── results/                 tous les chiffres du rapport (json / csv / points de contrôle)
+└── *_RESULTS.md, GRAPH_ANALYSIS.md   un compte rendu par étude
 ```
 
-## 7. Tools and why each is used
+## 7. Les outils et leur rôle
 
-| Tool | Role in the project |
+| Outil | Rôle dans le projet |
 |---|---|
-| **Python 3** | Everything |
-| **PyTorch** | The STAR network (TCN, GraphSAGE written by hand, losses), training on CPU or GPU |
-| **scikit-learn** | Baselines (logistic regression, Random Forest, ExtraTrees, gradient boosting) and metrics (AP, ROC-AUC, MCC) |
-| **SciPy** | Wilcoxon signed-rank test |
-| **NumPy / pandas** | Data handling, bootstrap resampling |
-| **Matplotlib** | Report figures |
-| **Streamlit + Altair** | Interactive app for testers |
-| **joblib** | Saving tabular models |
-| **unittest** | Automated tests, including protocol tests |
-| **Google Colab** | Running the notebook without a local setup |
-| **LaTeX (Overleaf)** | The report |
-| **Git / GitHub** | Versioning; every result in the report is committed in `results/` |
+| **Python 3** | Tout |
+| **PyTorch** | Le réseau STAR (TCN, GraphSAGE écrit à la main, pertes), entraînement sur CPU ou GPU |
+| **scikit-learn** | Références (régression logistique, Random Forest, ExtraTrees, gradient boosting) et métriques (AP, ROC-AUC, MCC) |
+| **SciPy** | Test des rangs signés de Wilcoxon, ANOVA de Scott-Knott |
+| **NumPy / pandas** | Manipulation des données, rééchantillonnage bootstrap |
+| **Matplotlib** | Figures du rapport |
+| **Streamlit + Altair** | Application interactive pour les testeurs |
+| **joblib** | Sauvegarde des modèles tabulaires |
+| **unittest** | Tests automatiques, y compris les tests de protocole |
+| **Google Colab** | Exécuter le notebook sans installation locale |
+| **LaTeX (Overleaf)** | Le rapport |
+| **Git / GitHub** | Gestion de versions ; chaque résultat du rapport est versionné dans `results/` |
 
-## 8. Run it
+## 8. Lancer le projet
 
 ```bash
 cd KIT_MULTI_PROJETS
 pip install -r requirements.txt
-python -m unittest discover -s tests -v       # 34 tests
-python compare_fair.py --project ant          # Phase 1 (~6.5 min CPU)  → results/phase1, PHASE1_RESULTS.md
-python effort_star.py --project ant           # Phase 2 (~4 min)
-python more_data.py --project ant             # Phase 3 (~4 min)
-python improve_star.py --project ant          # Phase 4 (~5 min)
-python transfer_study.py                      # step 6.3 (~5 min)
-python graph_analysis.py                      # step 7.3 (15 s)
+python -m unittest discover -s tests -v       # 36 tests
+python compare_fair.py --project ant          # phase 1 (~6,5 min CPU)  → results/phase1, PHASE1_RESULTS.md
+python effort_star.py --project ant           # phase 2 (~4 min)
+python more_data.py --project ant             # phase 3 (~4 min)
+python improve_star.py --project ant          # phase 4 (~5 min)
+python transfer_study.py                      # étape 6.3 (~5 min)
+python retune_project.py --projects camel poi # étape 5.5 (~6 min par projet)
+python graph_analysis.py                      # étape 7.3 (15 s)
+python sk_rank.py                             # étape 6.2 (quelques secondes, après 5.5)
 python train_final.py --project ant --groups 5 --ens 10 && python analyse_star.py --project ant
-streamlit run app.py                          # the application
+streamlit run app.py                          # l'application
 ```
 
-Run Phase 1 first: Phases 2, 3 and 6.3 read its frozen settings. No GPU is needed; every study runs in minutes on 2 CPU cores.
+Lancer la phase 1 en premier : les phases 2, 3 et 6.3 lisent ses réglages figés. Aucun GPU n'est nécessaire ; chaque
+étude tourne en quelques minutes sur 2 cœurs CPU.
 
-## 9. Limits
+## 9. Limites
 
-- **Detection, not forecasting**: the metrics of release t are used to find the defects of release t.
-- The import graph is **partial**: explicit imports only, with no method calls and no inheritance edges.
-- **New classes are excluded** (no 3-release history), which biases the sample. Their labels require the full PROMISE archive.
-- One main project with one test release: a confidence interval of about ±0.07 AP cannot detect small effects.
+- **Détection, pas prévision** : les métriques de la version t servent à trouver les défauts de la version t.
+- Le graphe d'imports est **partiel** : imports explicites seulement, sans appels de méthodes ni arêtes d'héritage.
+- **Les classes nouvelles sont exclues** (pas d'historique sur 3 versions), ce qui biaise l'échantillon. Leurs labels
+  nécessitent l'archive PROMISE complète.
+- Un seul projet principal et une seule version de test par projet : avec un intervalle de confiance d'environ
+  ±0,07 d'AP, les petits effets ne sont pas détectables.
 
-## 10. References
+## 10. Références
 
 - Rhazi, Banouar, Toure, Raghay (2026). *Software defect prediction via contrastive similarity learning and inter-sample attention.* Science of Computer Programming 254, 103534.
-- Kamei et al. (2013), Mende & Koschke (2010): effort-aware defect prediction (Popt).
-- Bai, Kolter, Koltun (2018): Temporal Convolutional Networks. Hamilton, Ying, Leskovec (2017): GraphSAGE.
-- van den Oord et al. (2018): InfoNCE. Khosla et al. (2020): Supervised Contrastive Learning.
-- PROMISE / tera-PROMISE defect datasets (Jureczko & Madeyski).
+- Kamei et al. (2013), Mende et Koschke (2010) : prédiction de défauts sensible à l'effort (Popt).
+- Bai, Kolter, Koltun (2018) : réseaux convolutifs temporels. Hamilton, Ying, Leskovec (2017) : GraphSAGE.
+- van den Oord et al. (2018) : InfoNCE. Khosla et al. (2020) : apprentissage contrastif supervisé.
+- Jeux de données PROMISE / tera-PROMISE (Jureczko et Madeyski).
