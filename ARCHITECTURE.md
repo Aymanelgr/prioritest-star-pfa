@@ -52,11 +52,19 @@ v1 (27 Nov) planned Phases 0–8. Phases 0–4 have since been executed; v2 rewr
 | 1 | Does each STAR mechanism help, under an equal tuning budget? | **No significant gain** at any step. A2–A6 ≈ LR (AP ≈ 0.80, CI ± 0.07). RankNet is slightly harmful (p = 0.049). Tree ensembles are significantly better than LR on effort ranking (RF Popt 0.750, +0.036, p = 0.007). The STAR + LR + ET blend also beats LR on Popt (+0.008, p = 0.006). | `PHASE1_RESULTS.md` |
 | 2 | Does learning effort-awareness (s = rank − γ·log LOC) beat post-hoc score / LOC? | **No.** γ is learned at ≈ 1, which is the post-hoc rule. Popt 0.711, the same as LR + density, and below RF + density (−0.038, p = 0.01). | `PHASE2_RESULTS.md` |
 | 3 | Does more data (3 399 classes from 9 other projects) help? | **No, because of distribution shift.** Joint −0.008 AP (n.s.); pre-training −0.025 (p = 0.03); zero-shot 0.734. **But STAR is the most robust to mixing projects:** STAR-joint beats LR-joint +0.029 (p = 0.04), while LR loses 0.030 with the same data. | `PHASE3_RESULTS.md` |
+| 6.3 | Do the Ant findings hold on Camel / POI / JEdit (configs frozen from Ant)? | **Partly.** On **Camel** (565 test classes) STAR with the graph beats LR significantly (A3 +0.066 AP, p < 0.001; blend +0.038 AP and +0.009 Popt, p ≤ 0.003). On **POI** the frozen graph variants collapse, but **joint cross-project STAR is the best model** (AP 0.920, +0.059 from joint data, p = 0.016). Joint STAR ≥ joint LR on every informative project. JEdit 4.3 (5 defects) is uninformative. | `TRANSFER_RESULTS.md` |
 | 4 | Personal improvement of fusion / contrast | Label-aware InfoNCE and SupCon are neutral. **Gate entropy** balances the views (α 0.63 → 0.55) at no cost; retained for interpretability. The \|zT − zS\| gate is harmful. | `PHASE4_RESULTS.md` |
 
-**The central finding.** On Ant, what limits performance is **data size and the information in the CK metrics**, not STAR's architecture. One test release of 292 classes cannot resolve effects below about 0.03 AP. The defensible STAR-specific results are:
-- STAR is **robust to cross-project data**, where linear models degrade;
-- STAR is **useful in a blend**: it significantly improves effort-aware ranking over LR.
+**The central finding (across 4 projects).** STAR's value is **project-dependent**:
+- On Ant, no mechanism is measurable; one test release of 292 classes cannot resolve effects below about 0.03 AP.
+- On Camel, the graph view gives the largest gain of the whole study.
+- On POI, STAR wins only when trained with cross-project data.
+
+The STAR-specific results that hold on every informative project:
+- STAR **exploits heterogeneous cross-project data better than a linear model** (joint STAR ≥ joint LR on Ant, Camel and POI);
+- the **STAR + LR + ET blend** improves effort-aware ranking over LR on the projects with the most training data (Ant, Camel).
+
+Tree ensembles, mostly ExtraTrees, remain the safest effort-aware baseline everywhere.
 
 ---
 
@@ -108,9 +116,9 @@ prioritest-star/
     ├── src/  model.py · train.py · stats.py · data.py (5.1)
     ├── run_star.py · explore_val.py · train_final.py                       ← ablations, search, STAR-R
     ├── compare_fair.py · effort_star.py · more_data.py · improve_star.py   ← Phases 1–4
-    ├── transfer_study.py (6.3) · domain_adapt.py (5.2) · final_model.py (6.1)
+    ├── transfer_study.py (6.3, done) · domain_adapt.py (5.2) · final_model.py (6.1)
     ├── analyse_star.py · app.py
-    ├── PHASE{1..4}_RESULTS.md · RESULTS_STAR_R.md
+    ├── PHASE{1..4}_RESULTS.md · TRANSFER_RESULTS.md · RESULTS_STAR_R.md
     ├── tests/                     ← 30 tests (+ leakage tests, 6.4)
     ├── notebooks/PRIORITEST_STAR_Colab.ipynb
     └── results/                   ← committed; every number in the report comes from here
@@ -145,6 +153,7 @@ Ordered by **expected value for the defence**. Each step lists the goal, what to
   - optional adversarial project discriminator (gradient reversal) on z.
   - Select on Ant 1.6 and test once. **Done when** joint STAR is compared with Ant-only STAR with a CI. Success = ΔAP > 0 with a CI excluding 0.
 - [ ] **5.3 Cold-start classes (R5).** Add `PROMISE-dataset-main.zip`, rerun `prepare_multi.py` and also export labels for the classes outside the strict window. Train with a presence mask (missing releases zeroed, mask fed to the TCN), then evaluate separately on old and new classes. **Done when** the report has a "selection bias" table: defect rate and recall for new vs old classes.
+- [ ] **5.5 Per-project validation for 2-window projects (follow-up to 6.3).** Frozen Ant settings hurt the graph variants on POI. Retune epochs per project with an inner chronological check (train on the first window's first two releases, validate on its third) or with cross-project validation, then re-test.
 - [ ] **5.4 Give STAR the trees' strength (follow-up to Phase 2).** RF wins on effort ranking through feature interactions, so:
   - (a) **distil** out-of-fold RF probabilities into STAR's risk head as a soft target;
   - (b) add a **third view**, a tabular MLP on [last metrics, Δ], into the similarity-guided gate.
@@ -154,7 +163,7 @@ Ordered by **expected value for the defence**. Each step lists the goal, what to
 
 - [ ] **6.1 `final_model.py`.** Freeze the final choice of §2.2 on validation and run it once with 10 seeds. Save the checkpoints plus the blend, and regenerate `results/analysis/` and the app's data from it.
 - [ ] **6.2 Scott-Knott ESD** ranking of all models (Phase 1 table) in `src/stats.py`, as in the SDP literature.
-- [ ] **6.3 Second and third target projects.** `transfer_study.py` runs the Phase-1 protocol with **configurations frozen from Ant** (no tuning on the new test) on:
+- [x] **6.3 Second and third target projects.** *(done: `python transfer_study.py`, see `TRANSFER_RESULTS.md`)* `transfer_study.py` runs the Phase-1 protocol with **configurations frozen from Ant** (no tuning on the new test) on:
   - **Camel** 1.4 → 1.6 (565 test classes, 127 defective; a bigger test set gives tighter CIs);
   - **POI** 2.5 → 3.0.
   - **JEdit** is reported with its bootstrap CI and the 5-positive caveat.
@@ -168,7 +177,7 @@ Ordered by **expected value for the defence**. Each step lists the goal, what to
 
 - [ ] 7.1 Budget–recall curves with CI bands for: LR, RF, STAR A5, the blend, and the random and oracle orderings.
 - [ ] 7.2 α / β and cos(zT, zS), with and without gate entropy, broken down by defective vs clean, correct vs wrong, unstable (large |Δ|) vs highly coupled (high CBO / in-degree).
-- [ ] 7.3 Performance by node-degree bucket: isolated (37 % of Ant classes), low, high. This shows where the graph *could* help.
+- [ ] 7.3 **Key analysis after 6.3:** performance by node-degree bucket (isolated, low, high) **per project**, plus graph statistics (density, coverage, defect assortativity: do defective classes import defective classes?). This explains why the graph helps on Camel and not on Ant or POI.
 - [ ] 7.4 Error analysis plus SHAP on RF/LR: false positives are large coupled classes; missed defects are small, bland classes.
 - [ ] 7.5 `app.py`:
   - selectors for project and model (LR, RF, STAR, blend) and for risk vs density ordering, plus a LOC budget slider;
@@ -183,11 +192,11 @@ Ordered by **expected value for the defence**. Each step lists the goal, what to
 
 | Chapter | Content to add |
 |---|---|
-| Résumé / Abstract | Headline per §1.2: STAR ≈ strong linear / tree baselines on Ant; robust to cross-project data; useful in a blend for effort ranking |
+| Résumé / Abstract | Headline per §1.2: STAR's value is project-dependent (no gain on Ant, graph gain on Camel); STAR exploits cross-project data better than LR; the blend helps effort ranking |
 | État de l'art | Critical reading of Rhazi et al. (weighted F1, random split, no effort metrics, Top-N); SAINT, FT-Transformer, bjCnet, DP-CCL; effort-aware SDP (Kamei 2013, Mende & Koschke 2010); cross-project SDP; TCN, GraphSAGE, InfoNCE / SupCon |
 | Architecture | Final model (§2.2), loss equations, gate entropy, STAR-E |
 | Données | Windows, coverage, prevalence shift (17 % → 35 %), the 37 % isolated nodes, cross-project pool |
-| Expérimentations | Phase 1 table with CIs and tests; Phases 2–4 as documented null / positive results; Camel / POI transfer |
+| Expérimentations | Phase 1 table with CIs and tests; Phases 2–4 as documented null / positive results; the 4-project claims table from `TRANSFER_RESULTS.md` |
 | Analyse | Phase 7 figures |
 | Limites | R1, R4, R5, one main project, one test release, CI width |
 | Perspectives | Steps 5.2–5.4 not yet done; prospective t → t+1 protocol with a label-availability audit; richer dependency extraction |
@@ -201,8 +210,8 @@ Ordered by **expected value for the defence**. Each step lists the goal, what to
 | Week | Work | FICHE §10 milestone |
 |---|---|---|
 | W1 (done) | Phases 0–4 | Data, baselines, STAR, ablations, protocol without leakage |
-| W2 | 5.1, 5.2, 5.4 | Experiments that can change the conclusions |
-| W3 | 5.3 (if archive), 6.1–6.4 | Robust, multi-project claims |
+| W2 | 5.1, 5.2, 5.4, 5.5 | Experiments that can change the conclusions |
+| W3 | 5.3 (if archive), 5.5, 6.1, 6.2, 6.4 (6.3 done) | Robust, multi-project claims |
 | W4 | 7, 8.1–8.2 | Explorable Top-k, figures, reproducibility |
 | W5 | 8.3–8.4 | Report and defence |
 
@@ -231,6 +240,6 @@ The FICHE grades **correct reproduction, a leak-free protocol and interpretable 
 ("aucune performance minimale n'est garantie"). The strongest defensible outcome is therefore:
 
 1. A fair, equal-budget, significance-tested ablation showing that, on Ant, **no STAR mechanism gives a measurable gain**, with the reason: 118 training classes and a test CI of ± 0.07. *(done)*
-2. The **positive STAR-specific findings**: robustness to cross-project data, and a significant gain over LR on effort ranking when blended. *(done; to confirm on Camel / POI in 6.3)*
+2. The **positive STAR-specific findings**: the graph gain on Camel, the better use of cross-project data than LR (Ant, Camel, POI), and the blend's significant gain on effort ranking (Ant, Camel). *(done, 6.3)*
 3. One more serious attempt to make STAR's design pay off (5.2 domain adaptation, 5.4 tree distillation / third view), reported whatever the outcome.
 4. A clear app and report that never overclaim (R1, R4, R5).

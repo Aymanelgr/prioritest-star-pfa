@@ -40,9 +40,10 @@ l'ordre d'inspection change, aucun paramètre n'est réglé sur le test.
 | 2 — STAR-E (effort appris) | `python effort_star.py --project ant` | ~4 min | `results/phase2/`, `PHASE2_RESULTS.md` |
 | 3 — données inter-projets | `python more_data.py --project ant` | ~4 min | `results/phase3/`, `PHASE3_RESULTS.md` |
 | 4 — amélioration fusion / contraste | `python improve_star.py --project ant` | ~8 min | `results/phase4/`, `PHASE4_RESULTS.md` |
+| 6.3 — transfert Camel / POI / JEdit (réglages figés depuis Ant) | `python transfer_study.py` | ~5 min | `results/transfer/`, `TRANSFER_RESULTS.md` |
 | Analyse + application | `python analyse_star.py --project ant` puis `streamlit run app.py` | < 1 min | `results/analysis/` |
 
-Phase 3 et 2 lisent `results/phase1/` : lancer la phase 1 d'abord. Tests : `python -m unittest discover -s tests -v` (30 tests).
+Les phases 2, 3 et 6.3 lisent `results/phase1/` (et 6.3 aussi `phase3/`, `phase4/`) : lancer les phases dans l'ordre. Tests : `python -m unittest discover -s tests -v` (30 tests).
 
 ## Exécution (lanceur initial, 4 variantes)
 ```bash
