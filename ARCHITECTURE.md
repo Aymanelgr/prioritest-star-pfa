@@ -142,8 +142,8 @@ Each step has: **goal · tasks · command · done when**. Phases are ordered by
 **Goal:** one clean, pushed, reproducible baseline before any new experiment.
 
 - [ ] 0.1 Push the local folder (`prioritest-star-main`) to `mohamedaoui/prioritest-star` (commands in §6).
-- [ ] 0.2 `.gitignore`: ignore `.venv/`, `__pycache__/`, `*.pyc`; **stop ignoring `results/`** (keep files < 5 MB; LFS or a release asset for bigger ones like `tabular_models.joblib`).
-- [ ] 0.3 `requirements.txt`: add `streamlit`, `altair`, `joblib`; pin versions that were used (`pip freeze` from `.venv`).
+- [x] 0.2 `.gitignore`: ignore `.venv/`, `__pycache__/`, `*.pyc`; **stop ignoring `results/`** (keep files < 5 MB; LFS or a release asset for bigger ones like `tabular_models.joblib`).
+- [x] 0.3 `requirements.txt`: add `streamlit`, `altair`, `joblib`; pin versions that were used (`pip freeze` from `.venv`).
 - [ ] 0.4 Remove duplicates: `Claude outputs/` vs `rapport/`, two copies of the PDF report, `to do.txt` (move to `docs/` or delete).
 - [ ] 0.5 Tag the current state: `git tag v0.1-star-r`.
 
@@ -155,14 +155,14 @@ Each step has: **goal · tasks · command · done when**. Phases are ordered by
 
 **Goal:** every claim in the report backed by a CI or a test. This matters more than any +0.01 AP.
 
-- [ ] 1.1 **Equal tuning budget.** Run `explore_val.py` for **each** neural variant A2–A7 (same grid size, same seeds, same smoothed-epoch rule) and save `configs/A*.json`. Tabular baselines (HGB, LR, ET, RF) get a small grid on validation too.
-- [ ] 1.2 **Re-run the ladder with tuned configs**, 10 seeds, refit train+val, single test pass:
+- [x] 1.1 **Equal tuning budget.** *(done in `compare_fair.py`)* Run `explore_val.py` for **each** neural variant A2–A7 (same grid size, same seeds, same smoothed-epoch rule) and save `configs/A*.json`. Tabular baselines (HGB, LR, ET, RF) get a small grid on validation too.
+- [x] 1.2 **Re-run the ladder with tuned configs** *(done: `python compare_fair.py --project ant`, results in `PHASE1_RESULTS.md`)*, 10 seeds, refit train+val, single test pass:
   `python run_star.py --project ant --seeds 42..51 --config-dir configs --improved`
-- [ ] 1.3 `src/stats.py`:
+- [x] 1.3 `src/stats.py` *(done, + `tests/test_stats.py`; Scott-Knott still to add)*:
   - class-level **bootstrap 95% CI** on test AP / Popt / Recall@20%LOC (2 000 resamples);
   - **Wilcoxon signed-rank** over seeds between consecutive ablation steps (A_k vs A_{k-1});
   - **Cliff's δ** effect size; **Scott-Knott ESD** ranking of all models.
-- [ ] 1.4 Add strong, standard baselines to the table: **LR**, **Random Forest**, **HGB**, and a
+- [x] 1.4 Add strong, standard baselines *(done: LR, RF, ET, HGB, kNN-cosine)* to the table: **LR**, **Random Forest**, **HGB**, and a
   **Rhazi-style kNN** baseline (cosine similarity on standardised metrics, Top-N weighted vote, N chosen on validation) — a cheap, honest proxy of the reference paper's decision rule.
 - [ ] 1.5 Test `tests/test_no_leakage.py`: assert the test file is never opened by `explore_val.py`; assert normalisation stats come from window 1 only; assert flag rate is computed from validation scores.
 
@@ -170,6 +170,12 @@ Each step has: **goal · tasks · command · done when**. Phases are ordered by
 **Done when:** the report's ablation table has mean ± std, 95% CI and a significance mark per step.
 
 ---
+
+### Phase 1 outcome (27 Nov 2026) — see `KIT_MULTI_PROJETS/PHASE1_RESULTS.md`
+
+- Under a fair protocol, A2–A6 all tie logistic regression on Ant 1.7 (AP ≈ 0.80, bootstrap CI ±0.07); no mechanism step is significant except RankNet, which is slightly harmful (p = 0.049).
+- RF / ExtraTrees are the best effort-aware models (Popt 0.75, R@20 % LOC 0.35–0.36 vs 0.71 / 0.30 for STAR).
+- Implications: Phase 2 must beat **RF + density**, not LR; Phase 3 (more data) is required before any mechanism can be shown to matter.
 
 ### Phase 2 — Make effort-awareness native (main expected gain) (2–3 days)
 

@@ -1,0 +1,167 @@
+{
+ "A2_TCN_BCE": {
+  "cfg": {
+   "use_graph": false,
+   "similarity_gate": false,
+   "lambda_c": 0.0,
+   "lambda_r": 0.0,
+   "use_delta": true
+  },
+  "hp": {
+   "lr": 0.001,
+   "weight_decay": 0.0001,
+   "temperature": 0.2
+  },
+  "epochs": 48,
+  "val_AP": 0.6836,
+  "grid_point": {
+   "lr": 0.001,
+   "weight_decay": 0.0001,
+   "use_delta": true
+  }
+ },
+ "A3_graph_classic_fusion_BCE": {
+  "cfg": {
+   "use_graph": true,
+   "similarity_gate": false,
+   "lambda_c": 0.0,
+   "lambda_r": 0.0,
+   "use_delta": true
+  },
+  "hp": {
+   "lr": 0.001,
+   "weight_decay": 0.001,
+   "temperature": 0.2
+  },
+  "epochs": 52,
+  "val_AP": 0.685,
+  "grid_point": {
+   "lr": 0.001,
+   "weight_decay": 0.001,
+   "use_delta": true
+  }
+ },
+ "A4_similarity_fusion_BCE": {
+  "cfg": {
+   "use_graph": true,
+   "similarity_gate": true,
+   "lambda_c": 0.0,
+   "lambda_r": 0.0,
+   "use_delta": false
+  },
+  "hp": {
+   "lr": 0.003,
+   "weight_decay": 0.001,
+   "temperature": 0.2
+  },
+  "epochs": 22,
+  "val_AP": 0.6824,
+  "grid_point": {
+   "lr": 0.003,
+   "weight_decay": 0.001,
+   "use_delta": false
+  }
+ },
+ "A5_plus_InfoNCE": {
+  "cfg": {
+   "use_graph": true,
+   "similarity_gate": true,
+   "lambda_c": 0.1,
+   "lambda_r": 0.0,
+   "use_delta": false
+  },
+  "hp": {
+   "lr": 0.003,
+   "weight_decay": 0.001,
+   "temperature": 0.2
+  },
+  "epochs": 24,
+  "val_AP": 0.6876,
+  "grid_point": {
+   "lr": 0.003,
+   "weight_decay": 0.001,
+   "use_delta": false,
+   "lambda_c": 0.1
+  }
+ },
+ "A6_STAR_full": {
+  "cfg": {
+   "use_graph": true,
+   "similarity_gate": true,
+   "lambda_c": 0.1,
+   "lambda_r": 0.25,
+   "use_delta": true
+  },
+  "hp": {
+   "lr": 0.001,
+   "weight_decay": 0.001,
+   "temperature": 0.2
+  },
+  "epochs": 64,
+  "val_AP": 0.6831,
+  "grid_point": {
+   "lr": 0.001,
+   "weight_decay": 0.001,
+   "use_delta": true,
+   "lambda_c": 0.1,
+   "lambda_r": 0.25
+  }
+ },
+ "A7_STAR_plus": {
+  "cfg": {
+   "use_graph": true,
+   "similarity_gate": true,
+   "lambda_c": 0.1,
+   "lambda_r": 0.25,
+   "use_delta": true,
+   "bidirectional": true,
+   "dropout": 0.1,
+   "label_aware": true,
+   "effort_aware": true
+  },
+  "hp": {
+   "lr": 0.001,
+   "weight_decay": 0.0001,
+   "temperature": 0.2
+  },
+  "epochs": 89,
+  "val_AP": 0.603,
+  "grid_point": {
+   "lr": 0.001,
+   "weight_decay": 0.0001,
+   "use_delta": true,
+   "lambda_c": 0.1,
+   "lambda_r": 0.25
+  }
+ },
+ "A1_HGB": {
+  "params": {
+   "it": 100,
+   "leaf": 4
+  },
+  "val_AP": 0.6747
+ },
+ "B_LR": {
+  "params": {
+   "C": 0.03
+  },
+  "val_AP": 0.7037
+ },
+ "B_RF": {
+  "params": {
+   "leaf": 10
+  },
+  "val_AP": 0.6817
+ },
+ "B_ET": {
+  "params": {
+   "leaf": 5
+  },
+  "val_AP": 0.7038
+ },
+ "B_kNN_cosine": {
+  "params": {
+   "N": 50
+  }
+ }
+}
