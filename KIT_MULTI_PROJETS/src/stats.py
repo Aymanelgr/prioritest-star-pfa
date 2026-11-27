@@ -115,3 +115,54 @@ def cliffs_delta(a, b):
     m = abs(d)
     mag = 'negligible' if m < .147 else 'small' if m < .33 else 'medium' if m < .474 else 'large'
     return d, mag
+
+
+def _cohen_d(a, b):
+    s = np.sqrt((np.var(a, ddof=1) + np.var(b, ddof=1)) / 2)
+    return 0. if s == 0 else abs(np.mean(a) - np.mean(b)) / s
+
+
+def scott_knott_esd(samples, alpha=.05, negligible=.2):
+    """Scott-Knott ESD ranking (Tantithamthavorn et al. 2017) of models from per-model samples of a metric
+    (here: class-bootstrap estimates computed on the SAME resamples for every model).
+    1. Sort models by mean; recursively split the sorted list where the between-group sum of squares is largest,
+       keeping the split only if a one-way ANOVA on the two groups is significant (p < alpha).
+    2. Merge adjacent groups whose Cohen's d is negligible (< 0.2).
+    Returns {model: rank}, rank 1 = best group."""
+    from scipy.stats import f_oneway
+    names = sorted(samples, key=lambda k: -np.mean(samples[k]))
+
+    def split(group):
+        if len(group) < 2:
+            return [group]
+        m = [np.mean(samples[k]) for k in group]; mu = np.mean(m); best, cut = -1, None
+        for i in range(1, len(group)):
+            l, r = m[:i], m[i:]
+            b = len(l) * (np.mean(l) - mu) ** 2 + len(r) * (np.mean(r) - mu) ** 2
+            if b > best:
+                best, cut = b, i
+        left = np.concatenate([samples[k] for k in group[:cut]]); right = np.concatenate([samples[k] for k in group[cut:]])
+        if f_oneway(left, right).pvalue < alpha:
+            return split(group[:cut]) + split(group[cut:])
+        return [group]
+
+    groups = split(names); merged = [groups[0]]
+    for g in groups[1:]:
+        prev = np.concatenate([samples[k] for k in merged[-1]]); cur = np.concatenate([samples[k] for k in g])
+        if _cohen_d(prev, cur) < negligible:
+            merged[-1] = merged[-1] + g
+        else:
+            merged.append(g)
+    return {k: i + 1 for i, g in enumerate(merged) for k in g}
+
+
+def bootstrap_samples(score_dict, y, loc, metric='AP', n=1000, seed=0):
+    """Metric of every model on the same class-bootstrap resamples (input for scott_knott_esd)."""
+    f = metric_fn(metric); rng = np.random.default_rng(seed); y = np.asarray(y); loc = np.asarray(loc); N = len(y)
+    out = {k: [] for k in score_dict}
+    for _ in range(n):
+        i = rng.integers(0, N, N)
+        if 0 < y[i].sum() < N:
+            for k, s in score_dict.items():
+                out[k].append(f(np.asarray(s)[i], y[i], loc[i]))
+    return {k: np.asarray(v) for k, v in out.items()}

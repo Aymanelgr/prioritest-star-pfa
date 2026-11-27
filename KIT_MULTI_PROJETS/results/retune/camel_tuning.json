@@ -1,0 +1,135 @@
+{
+ "A2_TCN_BCE": {
+  "cfg": {
+   "use_graph": false,
+   "similarity_gate": false,
+   "lambda_c": 0.0,
+   "lambda_r": 0.0,
+   "use_delta": false
+  },
+  "hp": {
+   "lr": 0.001,
+   "weight_decay": 0.0001,
+   "temperature": 0.2
+  },
+  "epochs": 111,
+  "inner_AP": 0.4501,
+  "grid_point": {
+   "lr": 0.001,
+   "weight_decay": 0.0001,
+   "use_delta": false
+  }
+ },
+ "A3_graph_classic_fusion_BCE": {
+  "cfg": {
+   "use_graph": true,
+   "similarity_gate": false,
+   "lambda_c": 0.0,
+   "lambda_r": 0.0,
+   "use_delta": false
+  },
+  "hp": {
+   "lr": 0.001,
+   "weight_decay": 0.001,
+   "temperature": 0.2
+  },
+  "epochs": 95,
+  "inner_AP": 0.485,
+  "grid_point": {
+   "lr": 0.001,
+   "weight_decay": 0.001,
+   "use_delta": false
+  }
+ },
+ "A4_similarity_fusion_BCE": {
+  "cfg": {
+   "use_graph": true,
+   "similarity_gate": true,
+   "lambda_c": 0.0,
+   "lambda_r": 0.0,
+   "use_delta": false
+  },
+  "hp": {
+   "lr": 0.003,
+   "weight_decay": 0.001,
+   "temperature": 0.2
+  },
+  "epochs": 52,
+  "inner_AP": 0.4575,
+  "grid_point": {
+   "lr": 0.003,
+   "weight_decay": 0.001,
+   "use_delta": false
+  }
+ },
+ "A5_plus_InfoNCE": {
+  "cfg": {
+   "use_graph": true,
+   "similarity_gate": true,
+   "lambda_c": 0.1,
+   "lambda_r": 0.0,
+   "use_delta": false
+  },
+  "hp": {
+   "lr": 0.001,
+   "weight_decay": 0.0001,
+   "temperature": 0.2
+  },
+  "epochs": 119,
+  "inner_AP": 0.508,
+  "grid_point": {
+   "lr": 0.001,
+   "weight_decay": 0.0001,
+   "use_delta": false,
+   "lambda_c": 0.1
+  }
+ },
+ "A6_STAR_full": {
+  "cfg": {
+   "use_graph": true,
+   "similarity_gate": true,
+   "lambda_c": 0.1,
+   "lambda_r": 0.25,
+   "use_delta": false
+  },
+  "hp": {
+   "lr": 0.003,
+   "weight_decay": 0.0001,
+   "temperature": 0.2
+  },
+  "epochs": 83,
+  "inner_AP": 0.5332,
+  "grid_point": {
+   "lr": 0.003,
+   "weight_decay": 0.0001,
+   "use_delta": false,
+   "lambda_c": 0.1,
+   "lambda_r": 0.25
+  }
+ },
+ "A1_HGB": {
+  "params": {
+   "it": 50,
+   "leaf": 15
+  },
+  "inner_AP": 0.4737
+ },
+ "B_LR": {
+  "params": {
+   "C": 0.3
+  },
+  "inner_AP": 0.4676
+ },
+ "B_RF": {
+  "params": {
+   "leaf": 3
+  },
+  "inner_AP": 0.5408
+ },
+ "B_ET": {
+  "params": {
+   "leaf": 5
+  },
+  "inner_AP": 0.5129
+ }
+}

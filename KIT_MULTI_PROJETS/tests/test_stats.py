@@ -43,3 +43,16 @@ class TestStats(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class TestScottKnott(unittest.TestCase):
+    def test_groups(self):
+        rng = np.random.default_rng(0)
+        s = {'a': rng.normal(.9, .01, 200), 'b': rng.normal(.9, .01, 200), 'c': rng.normal(.5, .01, 200)}
+        r = S.scott_knott_esd(s)
+        self.assertEqual(r['a'], r['b']); self.assertEqual(r['a'], 1); self.assertEqual(r['c'], 2)
+
+    def test_negligible_difference_merged(self):
+        rng = np.random.default_rng(1)
+        s = {'a': rng.normal(.80, .05, 500), 'b': rng.normal(.795, .05, 500)}
+        r = S.scott_knott_esd(s); self.assertEqual(r['a'], r['b'])

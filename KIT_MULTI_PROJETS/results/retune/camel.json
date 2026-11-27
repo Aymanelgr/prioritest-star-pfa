@@ -1,0 +1,426 @@
+{
+ "project": "camel",
+ "train": "1.4",
+ "test": "1.6",
+ "n_test": 565,
+ "defective_test": 127,
+ "protocol": "3-fold node split of the training release for tuning; refit on all; single test pass",
+ "table": {
+  "A2_TCN_BCE": {
+   "AP": 0.4902,
+   "ROC_AUC": 0.7322,
+   "Popt": 0.5298,
+   "Popt_density": 0.8,
+   "R@20LOC_density": 0.5488,
+   "IFA": 0.3,
+   "AP_std": 0.009,
+   "AP_ens": [
+    0.508,
+    0.4236,
+    0.5941
+   ],
+   "Popt_density_ens": 0.8103,
+   "frozen_from_ant_AP": 0.4379
+  },
+  "A3_graph_classic_fusion_BCE": {
+   "AP": 0.4977,
+   "ROC_AUC": 0.7184,
+   "Popt": 0.557,
+   "Popt_density": 0.7435,
+   "R@20LOC_density": 0.474,
+   "IFA": 0.1,
+   "AP_std": 0.0256,
+   "AP_ens": [
+    0.538,
+    0.4473,
+    0.6269
+   ],
+   "Popt_density_ens": 0.7957,
+   "frozen_from_ant_AP": 0.4747
+  },
+  "A4_similarity_fusion_BCE": {
+   "AP": 0.4997,
+   "ROC_AUC": 0.7224,
+   "Popt": 0.5561,
+   "Popt_density": 0.7354,
+   "R@20LOC_density": 0.4827,
+   "IFA": 0.0,
+   "AP_std": 0.0187,
+   "AP_ens": [
+    0.542,
+    0.4533,
+    0.6291
+   ],
+   "Popt_density_ens": 0.7773,
+   "frozen_from_ant_AP": 0.4616
+  },
+  "A5_plus_InfoNCE": {
+   "AP": 0.5073,
+   "ROC_AUC": 0.737,
+   "Popt": 0.5374,
+   "Popt_density": 0.7874,
+   "R@20LOC_density": 0.5213,
+   "IFA": 0.2,
+   "AP_std": 0.0133,
+   "AP_ens": [
+    0.5393,
+    0.4525,
+    0.6289
+   ],
+   "Popt_density_ens": 0.8144,
+   "frozen_from_ant_AP": 0.4387
+  },
+  "A6_STAR_full": {
+   "AP": 0.4616,
+   "ROC_AUC": 0.7031,
+   "Popt": 0.516,
+   "Popt_density": 0.6783,
+   "R@20LOC_density": 0.422,
+   "IFA": 0.4,
+   "AP_std": 0.0226,
+   "AP_ens": [
+    0.4983,
+    0.4124,
+    0.5935
+   ],
+   "Popt_density_ens": 0.7062,
+   "frozen_from_ant_AP": 0.4582
+  },
+  "A1_HGB": {
+   "AP": 0.4369,
+   "ROC_AUC": 0.6951,
+   "Popt": 0.4135,
+   "Popt_density": 0.7754,
+   "R@20LOC_density": 0.5197,
+   "IFA": 0.0,
+   "AP_std": 0.0,
+   "AP_ens": [
+    0.4369,
+    0.3541,
+    0.5223
+   ],
+   "Popt_density_ens": 0.7754,
+   "frozen_from_ant_AP": 0.4304
+  },
+  "B_LR": {
+   "AP": 0.4516,
+   "ROC_AUC": 0.6942,
+   "Popt": 0.3614,
+   "Popt_density": 0.7835,
+   "R@20LOC_density": 0.5591,
+   "IFA": 0.0,
+   "AP_std": 0.0,
+   "AP_ens": [
+    0.4516,
+    0.365,
+    0.5423
+   ],
+   "Popt_density_ens": 0.7835,
+   "frozen_from_ant_AP": 0.42
+  },
+  "B_RF": {
+   "AP": 0.4753,
+   "ROC_AUC": 0.7011,
+   "Popt": 0.4107,
+   "Popt_density": 0.7799,
+   "R@20LOC_density": 0.5567,
+   "IFA": 0.0,
+   "AP_std": 0.0059,
+   "AP_ens": [
+    0.478,
+    0.3945,
+    0.5628
+   ],
+   "Popt_density_ens": 0.7813,
+   "frozen_from_ant_AP": 0.4352
+  },
+  "B_ET": {
+   "AP": 0.4857,
+   "ROC_AUC": 0.6983,
+   "Popt": 0.38,
+   "Popt_density": 0.79,
+   "R@20LOC_density": 0.5465,
+   "IFA": 0.0,
+   "AP_std": 0.0036,
+   "AP_ens": [
+    0.4864,
+    0.4017,
+    0.5664
+   ],
+   "Popt_density_ens": 0.7903,
+   "frozen_from_ant_AP": 0.4857
+  },
+  "STAR_R_blend": {
+   "AP": 0.5174,
+   "ROC_AUC": 0.7174,
+   "Popt": 0.4278,
+   "Popt_density": 0.8031,
+   "R@20LOC_density": 0.5591,
+   "IFA": 0.0,
+   "AP_std": 0.0,
+   "AP_ens": [
+    0.517,
+    0.4276,
+    0.6066
+   ],
+   "Popt_density_ens": 0.8031,
+   "frozen_from_ant_AP": 0.4588
+  }
+ },
+ "tests": [
+  {
+   "model": "A2_TCN_BCE",
+   "vs": "B_LR",
+   "metric": "AP",
+   "diff": 0.0564,
+   "CI95": [
+    0.0005,
+    0.1109
+   ],
+   "p": 0.049
+  },
+  {
+   "model": "A2_TCN_BCE",
+   "vs": "B_LR",
+   "metric": "Popt_density",
+   "diff": 0.0268,
+   "CI95": [
+    -0.0049,
+    0.057
+   ],
+   "p": 0.089
+  },
+  {
+   "model": "A3_graph_classic_fusion_BCE",
+   "vs": "B_LR",
+   "metric": "AP",
+   "diff": 0.0864,
+   "CI95": [
+    0.021,
+    0.1513
+   ],
+   "p": 0.009
+  },
+  {
+   "model": "A3_graph_classic_fusion_BCE",
+   "vs": "B_LR",
+   "metric": "Popt_density",
+   "diff": 0.0121,
+   "CI95": [
+    -0.0269,
+    0.0486
+   ],
+   "p": 0.569
+  },
+  {
+   "model": "A4_similarity_fusion_BCE",
+   "vs": "B_LR",
+   "metric": "AP",
+   "diff": 0.0903,
+   "CI95": [
+    0.0242,
+    0.1572
+   ],
+   "p": 0.01
+  },
+  {
+   "model": "A4_similarity_fusion_BCE",
+   "vs": "B_LR",
+   "metric": "Popt_density",
+   "diff": -0.0063,
+   "CI95": [
+    -0.0497,
+    0.0353
+   ],
+   "p": 0.767
+  },
+  {
+   "model": "A5_plus_InfoNCE",
+   "vs": "B_LR",
+   "metric": "AP",
+   "diff": 0.0877,
+   "CI95": [
+    0.0277,
+    0.1493
+   ],
+   "p": 0.003
+  },
+  {
+   "model": "A5_plus_InfoNCE",
+   "vs": "B_LR",
+   "metric": "Popt_density",
+   "diff": 0.0308,
+   "CI95": [
+    -0.001,
+    0.0616
+   ],
+   "p": 0.056
+  },
+  {
+   "model": "A6_STAR_full",
+   "vs": "B_LR",
+   "metric": "AP",
+   "diff": 0.0467,
+   "CI95": [
+    -0.0158,
+    0.1139
+   ],
+   "p": 0.136
+  },
+  {
+   "model": "A6_STAR_full",
+   "vs": "B_LR",
+   "metric": "Popt_density",
+   "diff": -0.0774,
+   "CI95": [
+    -0.1413,
+    -0.0196
+   ],
+   "p": 0.006
+  },
+  {
+   "model": "A1_HGB",
+   "vs": "B_LR",
+   "metric": "AP",
+   "diff": -0.0147,
+   "CI95": [
+    -0.0753,
+    0.0468
+   ],
+   "p": 0.657
+  },
+  {
+   "model": "A1_HGB",
+   "vs": "B_LR",
+   "metric": "Popt_density",
+   "diff": -0.0081,
+   "CI95": [
+    -0.0377,
+    0.0174
+   ],
+   "p": 0.524
+  },
+  {
+   "model": "B_RF",
+   "vs": "B_LR",
+   "metric": "AP",
+   "diff": 0.0264,
+   "CI95": [
+    -0.0351,
+    0.0869
+   ],
+   "p": 0.426
+  },
+  {
+   "model": "B_RF",
+   "vs": "B_LR",
+   "metric": "Popt_density",
+   "diff": -0.0023,
+   "CI95": [
+    -0.0285,
+    0.0204
+   ],
+   "p": 0.847
+  },
+  {
+   "model": "B_ET",
+   "vs": "B_LR",
+   "metric": "AP",
+   "diff": 0.0347,
+   "CI95": [
+    -0.0139,
+    0.0787
+   ],
+   "p": 0.161
+  },
+  {
+   "model": "B_ET",
+   "vs": "B_LR",
+   "metric": "Popt_density",
+   "diff": 0.0068,
+   "CI95": [
+    -0.0079,
+    0.021
+   ],
+   "p": 0.356
+  },
+  {
+   "model": "STAR_R_blend",
+   "vs": "B_LR",
+   "metric": "AP",
+   "diff": 0.0653,
+   "CI95": [
+    0.0252,
+    0.108
+   ],
+   "p": 0.002
+  },
+  {
+   "model": "STAR_R_blend",
+   "vs": "B_LR",
+   "metric": "Popt_density",
+   "diff": 0.0195,
+   "CI95": [
+    0.004,
+    0.0342
+   ],
+   "p": 0.01
+  },
+  {
+   "model": "A2_TCN_BCE",
+   "vs": "A1_HGB",
+   "metric": "AP",
+   "diff": 0.0711,
+   "CI95": [
+    0.0075,
+    0.1347
+   ],
+   "p": 0.026
+  },
+  {
+   "model": "A3_graph_classic_fusion_BCE",
+   "vs": "A2_TCN_BCE",
+   "metric": "AP",
+   "diff": 0.03,
+   "CI95": [
+    -0.0179,
+    0.0809
+   ],
+   "p": 0.228
+  },
+  {
+   "model": "A4_similarity_fusion_BCE",
+   "vs": "A3_graph_classic_fusion_BCE",
+   "metric": "AP",
+   "diff": 0.0039,
+   "CI95": [
+    -0.0132,
+    0.0214
+   ],
+   "p": 0.698
+  },
+  {
+   "model": "A5_plus_InfoNCE",
+   "vs": "A4_similarity_fusion_BCE",
+   "metric": "AP",
+   "diff": -0.0026,
+   "CI95": [
+    -0.0353,
+    0.0307
+   ],
+   "p": 0.902
+  },
+  {
+   "model": "A6_STAR_full",
+   "vs": "A5_plus_InfoNCE",
+   "metric": "AP",
+   "diff": -0.041,
+   "CI95": [
+    -0.0689,
+    -0.008
+   ],
+   "p": 0.011
+  }
+ ],
+ "seconds": 350.9
+}

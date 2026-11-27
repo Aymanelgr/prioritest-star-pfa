@@ -153,7 +153,7 @@ Ordered by **expected value for the defence**. Each step lists the goal, what to
   - optional adversarial project discriminator (gradient reversal) on z.
   - Select on Ant 1.6 and test once. **Done when** joint STAR is compared with Ant-only STAR with a CI. Success = ΔAP > 0 with a CI excluding 0.
 - [ ] **5.3 Cold-start classes (R5).** Add `PROMISE-dataset-main.zip`, rerun `prepare_multi.py` and also export labels for the classes outside the strict window. Train with a presence mask (missing releases zeroed, mask fed to the TCN), then evaluate separately on old and new classes. **Done when** the report has a "selection bias" table: defect rate and recall for new vs old classes.
-- [ ] **5.5 Per-project validation for 2-window projects (follow-up to 6.3).** Frozen Ant settings hurt the graph variants on POI. Retune epochs per project with an inner chronological check (train on the first window's first two releases, validate on its third) or with cross-project validation, then re-test.
+- [~] **5.5 Per-project validation for 2-window projects (follow-up to 6.3).** *(in progress: `retune_project.py`, see `RETUNE_RESULTS.md`. Camel done: STAR A3–A5 beat LR by +0.09 AP (p ≤ 0.01) and RankNet hurts (−0.041, p = 0.011). POI not run yet: `python retune_project.py --projects poi`)* Frozen Ant settings hurt the graph variants on POI. Retune epochs per project with an inner chronological check (train on the first window's first two releases, validate on its third) or with cross-project validation, then re-test.
 - [ ] **5.4 Give STAR the trees' strength (follow-up to Phase 2).** RF wins on effort ranking through feature interactions, so:
   - (a) **distil** out-of-fold RF probabilities into STAR's risk head as a soft target;
   - (b) add a **third view**, a tabular MLP on [last metrics, Δ], into the similarity-guided gate.
@@ -162,7 +162,7 @@ Ordered by **expected value for the defence**. Each step lists the goal, what to
 ### Phase 6 — Robustness of the claims (2 days)
 
 - [ ] **6.1 `final_model.py`.** Freeze the final choice of §2.2 on validation and run it once with 10 seeds. Save the checkpoints plus the blend, and regenerate `results/analysis/` and the app's data from it.
-- [ ] **6.2 Scott-Knott ESD** ranking of all models (Phase 1 table) in `src/stats.py`, as in the SDP literature.
+- [~] **6.2 Scott-Knott ESD** *(code ready: `stats.scott_knott_esd` + `sk_rank.py`, unit-tested; to run once POI retuning is done)* ranking of all models (Phase 1 table) in `src/stats.py`, as in the SDP literature.
 - [x] **6.3 Second and third target projects.** *(done: `python transfer_study.py`, see `TRANSFER_RESULTS.md`)* `transfer_study.py` runs the Phase-1 protocol with **configurations frozen from Ant** (no tuning on the new test) on:
   - **Camel** 1.4 → 1.6 (565 test classes, 127 defective; a bigger test set gives tighter CIs);
   - **POI** 2.5 → 3.0.
