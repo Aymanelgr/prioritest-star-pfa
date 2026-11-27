@@ -7,7 +7,7 @@
 \usepackage[scaled=0.92]{helvet}      % Helvetica pour les titres
 \linespread{1.06}
 \IfFileExists{french.ldf}{\usepackage[english,french]{babel}}{\usepackage[english]{babel}}
-\usepackage[a4paper,top=2.6cm,bottom=2.6cm,left=2.6cm,right=2.4cm,headheight=14pt]{geometry}
+\usepackage[a4paper,top=2.6cm,bottom=2.6cm,left=2.6cm,right=2.4cm,headheight=22pt]{geometry}
 \usepackage{microtype}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
@@ -15,7 +15,7 @@
 \usepackage{booktabs,tabularx,multirow,array}
 \usepackage[table]{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,calc}
+\usetikzlibrary{positioning,arrows.meta,calc,babel}
 \usepackage{enumitem}
 \usepackage[font=small,labelfont={bf,sf,color=primary},labelsep=period]{caption}
 \usepackage{titlesec}
@@ -118,7 +118,7 @@ spatio-temporelles, fusion guidée par similarité et apprentissage contrastif d
 \begin{minipage}[b]{10cm}\sffamily\large
 \textbf{Réalisé par :}\\[0.35cm]
 \rule{0pt}{0pt}\\[0.5cm]
-\textbf{Encadré par :}\\[0.35cm]
+
 \rule{0pt}{0pt}\\[0.2cm]
 \end{minipage}
 
@@ -144,14 +144,18 @@ test once on~1.7), several random seeds and effort-aware metrics. An audit of th
 leakage but identified a very small training set and a shift in defect prevalence. We therefore propose
 \textbf{STAR-R}, a variance-reduced training procedure: a validation-only hyperparameter search with seed-averaged
 early stopping, a 10-seed ensemble, refitting on train and validation, and a validation-selected blend with two
-tabular models.
+tabular models. We then compare every model under an equal, validation-only tuning budget, with 10 seeds,
+class-bootstrap confidence intervals and paired tests, and extend the study to the Camel, POI and JEdit projects.
 
-On the untouched test release, STAR-R reaches an average precision of $0.799\pm0.003$, an accuracy of
+On the untouched Ant test release, STAR-R reaches an average precision of $0.799\pm0.003$, an accuracy of
 $0.823\pm0.004$ (majority baseline $0.651$), an F1-score of $0.745$ and an MCC of $0.610$, compared with
-$0.760\pm0.024$ AP and $0.751$ accuracy for the original model. A regularised logistic regression performs almost as
-well: on this dataset most of the signal lies in the metrics themselves, and the main gain of our procedure is
-stability. Ranking classes by risk per line of code, instead of raw risk, finds 2.5 times more defects at a 20\,\%
-code-inspection budget. A Streamlit application lets testers explore the prioritised list.
+$0.760\pm0.024$ AP and $0.751$ accuracy for the original model. Under equal tuning, however, no STAR mechanism gives
+a significant gain on Ant: all variants tie a regularised logistic regression (AP $\approx0.80$, 95\,\% CI about
+$\pm0.07$). The picture differs on Camel, the largest test release (565 classes): tuned on its own training release,
+STAR with the import graph beats logistic regression by about $+0.09$ AP ($p\le0.01$). Across projects, STAR makes
+better use of training data pooled from other projects than a linear model, and the RankNet loss consistently hurts.
+Ranking classes by risk per line of code, instead of raw risk, finds 2.5 times more defects at a 20\,\% code-inspection
+budget on Ant. A Streamlit application lets testers explore the prioritised list.
 
 \medskip\noindent\textbf{Keywords:} software defect prediction, test prioritisation, temporal convolutional network,
 GraphSAGE, contrastive learning, learning to rank, effort-aware evaluation.
@@ -175,15 +179,20 @@ l'effort. L'audit du pipeline fourni n'a révélé aucune fuite de labels, mais 
 décalage de la proportion de classes défectueuses. Nous proposons donc \textbf{STAR-R}, une procédure d'entraînement
 à variance réduite : recherche d'hyperparamètres sur la seule validation avec arrêt anticipé moyenné sur les graines,
 ensemble de 10 graines, ré-entraînement sur entraînement et validation, et mélange avec deux modèles tabulaires
-choisi sur la validation.
+choisi sur la validation. Nous comparons ensuite tous les modèles avec le même budget de réglage sur la seule
+validation, 10 graines, des intervalles de confiance par bootstrap et des tests appariés, puis étendons l'étude aux
+projets Camel, POI et JEdit.
 
-Sur la version de test, jamais utilisée pour les réglages, STAR-R atteint une précision moyenne (AP) de
+Sur la version de test d'Ant, jamais utilisée pour les réglages, STAR-R atteint une précision moyenne (AP) de
 $0{,}799\pm0{,}003$, une accuracy de $0{,}823\pm0{,}004$ (classe majoritaire : $0{,}651$), un F1 de $0{,}745$ et un
-MCC de $0{,}610$, contre $0{,}760\pm0{,}024$ d'AP et $0{,}751$ d'accuracy pour le modèle initial. Une régression
-logistique régularisée fait presque aussi bien : sur ces données, l'essentiel du signal se trouve dans les métriques,
-et l'apport principal de la procédure est la stabilité. Trier les classes par risque par ligne de code, plutôt que
-par risque brut, trouve 2,5 fois plus de défauts pour un budget de 20\,\% du code. Une application Streamlit permet
-d'explorer la liste priorisée.
+MCC de $0{,}610$, contre $0{,}760\pm0{,}024$ d'AP et $0{,}751$ d'accuracy pour le modèle initial. À réglage égal,
+cependant, aucun mécanisme de STAR n'apporte de gain significatif sur Ant : toutes les variantes font jeu égal avec une
+régression logistique régularisée (AP $\approx0{,}80$, IC à 95\,\% d'environ $\pm0{,}07$). Le constat change sur
+Camel, la plus grande version de test (565 classes) : réglé sur sa propre version d'entraînement, STAR avec le graphe
+d'imports dépasse la régression logistique d'environ $+0{,}09$ d'AP ($p\le0{,}01$). Sur l'ensemble des projets,
+STAR exploite mieux qu'un modèle linéaire les données d'autres projets, et la perte RankNet dégrade systématiquement
+les résultats. Trier les classes par risque par ligne de code, plutôt que par risque brut, trouve 2,5 fois plus de
+défauts pour un budget de 20\,\% du code sur Ant. Une application Streamlit permet d'explorer la liste priorisée.
 
 \medskip\noindent\textbf{Mots-clés :} prédiction de défauts logiciels, priorisation des tests, réseau convolutif
 temporel, GraphSAGE, apprentissage contrastif, apprentissage du classement, évaluation sensible à l'effort.
@@ -246,14 +255,23 @@ rigoureux, est un résultat valable.
 \textbf{Fichier} & \textbf{Rôle} \\
 \midrule
 \code{prepare\_multi.py} & Construit les fenêtres de trois versions à partir de l'archive PROMISE (fourni). \\
-\code{check\_graph\_temporal.py}\newline\code{tests/} & Contrôle des données et 19 tests unitaires (modèle, métriques). \\
+\code{check\_graph\_temporal.py}\newline\code{tests/} & Contrôle des données et 36 tests unitaires (modèle, métriques,
+statistiques, absence de fuite vers le test). \\
 \code{src/model.py} & Modèle CrossViewSTAR (TCN, GraphSAGE, fusion, têtes) et pertes InfoNCE / RankNet. \\
 \code{src/train.py} & Chargement des données et métriques d'évaluation. \\
+\code{src/stats.py} & \emph{Ajouté.} $P_{\mathrm{opt}}$, IFA, intervalles de confiance par bootstrap, tests appariés,
+Wilcoxon, delta de Cliff, Scott-Knott ESD. \\
 \code{run\_star.py} & Ablations A1--A8 sur plusieurs graines (référence de départ). \\
 \code{explore\_val.py} & \emph{Ajouté.} Recherche de 192 configurations $\times$ 3 graines sur la validation seule. \\
 \code{train\_final.py} & \emph{Ajouté.} Entraînement final STAR-R, choix sur validation, test évalué une fois, 5 répétitions. \\
 \code{analyse\_star.py} & \emph{Ajouté.} Courbe effort--rappel, poids de fusion, erreurs typiques, liste priorisée. \\
 \code{app.py} & \emph{Ajouté.} Application Streamlit de visualisation du Top-$k$. \\
+\code{compare\_fair.py} & \emph{Ajouté.} Comparaison à réglage égal de A1--A7 et des références, avec tests (sec.~\ref{sec:fair}). \\
+\code{effort\_star.py}, \code{more\_data.py},\newline\code{improve\_star.py} & \emph{Ajoutés.} Effort appris dans le
+modèle, données d'autres projets, améliorations de la fusion et du contraste (sec.~\ref{sec:effort}--\ref{sec:improve}). \\
+\code{transfer\_study.py},\newline\code{retune\_project.py} & \emph{Ajoutés.} Généralisation à Camel, POI et JEdit,
+avec réglages figés ou réglage interne (sec.~\ref{sec:transfer}). \\
+\code{graph\_analysis.py} & \emph{Ajouté.} Statistiques des graphes et apport du graphe selon le degré (sec.~\ref{sec:graph}). \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -284,6 +302,9 @@ de croyance profond, et Li et al.~\cite{li2017} utilisent un réseau convolutif 
 Sur des métriques tabulaires, Rhazi et al.~\cite{rhazi2026} proposent un apprentissage contrastif de la similarité
 entre classes, avec attention inter-échantillons et similarité cosinus de Frobenius, et rapportent de meilleurs F1
 que Random Forest, XGBoost, CatBoost, FT-Transformer et SAINT sur neuf projets (PROMISE, AEEEM, ReLink).
+Leur évaluation repose sur un découpage aléatoire au sein d'une même version, un F1 pondéré par la fréquence des
+classes et une prédiction par vote des $N$ classes d'entraînement les plus similaires, sans métrique sensible à
+l'effort : nos résultats, obtenus avec un protocole chronologique, ne sont donc pas directement comparables aux leurs.
 PRIORITEST-STAR reprend le \emph{principe} d'apprentissage des similarités mais pas leur architecture : ici, la
 similarité relie deux vues d'une \emph{même} classe et sert à guider leur fusion.
 
@@ -508,8 +529,11 @@ Seuls Ant et JEdit disposent de trois fenêtres, donc d'une partition chronologi
 \textbf{Ant est le projet principal} : entraînement sur 1.5, validation sur 1.6, test sur 1.7.
 JEdit est écarté des conclusions : sa version de test 4.3 ne contient que 5 classes défectueuses sur 179, ce qui rend
 les métriques instables (tous les modèles y obtiennent une accuracy inférieure à celle de la classe majoritaire,
-0,972). Camel et POI n'ont pas de validation indépendante, et les projets à une seule fenêtre ne permettent pas de
-test chronologique interne.
+0,972, et l'intervalle de confiance de l'AP couvre 0,05--0,70). Camel (1.4$\to$1.6) et POI (2.5$\to$3.0) n'ont pas de
+validation indépendante : ils servent à tester la généralisation des conclusions (section~\ref{sec:transfer}), avec
+les réglages figés depuis Ant ou avec un réglage interne à leur version d'entraînement. Les projets à une seule
+fenêtre ne permettent pas de test chronologique interne ; ils servent seulement de données sources dans l'étude
+inter-projets (section~\ref{sec:moredata}).
 
 \section{Audit des données}
 \begin{keybox}[Résultats de l'audit]
@@ -539,8 +563,13 @@ Ant : entraînement sur 1.5, validation sur 1.6, test sur 1.7, évalué une seul
   \item \textbf{Métriques complémentaires} : ROC-AUC, accuracy, précision, rappel, F1, MCC, avec un seuil choisi sur
         la validation ; $P_{\mathrm{opt}}$, l'aire normalisée sous la courbe effort--rappel (1 = oracle, 0,5 $\approx$
         hasard).
-  \item \textbf{Environnement} : CPU (2 cœurs), PyTorch 2.15, scikit-learn 1.9, sans GPU. Les résultats ont été
-        reproduits à $10^{-4}$ près sur un second poste Windows.
+  \item \textbf{Statistiques} (sections~\ref{sec:fair} et suivantes) : moyenne $\pm$ écart-type sur 10 graines,
+        intervalle de confiance à 95\,\% par bootstrap sur les classes du test (2\,000 tirages)~\cite{efron1993},
+        bootstrap apparié pour comparer deux modèles sur les mêmes classes, test de Wilcoxon~\cite{wilcoxon1945} sur
+        les graines et delta de Cliff~\cite{romano2006} comme taille d'effet.
+  \item \textbf{Environnement} : CPU (2 cœurs), PyTorch 2.15, scikit-learn 1.9, sans GPU. STAR-R a été réexécuté dans
+        un second environnement (Linux) : AP de 0,798 sur la première répétition, contre $0{,}799\pm0{,}003$ en
+        moyenne sur les cinq.
 \end{itemize}
 
 \section{Ablations avec la configuration d'origine}
@@ -567,7 +596,9 @@ A8 Ensemble        & 0,797 $\pm$ 0,013 & 0,865 & 0,500 & 0,316 & 0,801 & 0,554 \
 
 À partir de A4, chaque mécanisme ajoute un peu d'AP, mais les écarts sont du même ordre que l'écart-type entre
 graines. Le graphe seul (A3) n'améliore pas le TCN, et A7 se dégrade : le dropout et l'agrégation bidirectionnelle
-nuisent sur si peu de données.
+nuisent sur si peu de données. Ces variantes utilisent toutes les hyperparamètres par défaut du kit, alors que STAR-R
+(section suivante) bénéficie d'une recherche de 192 configurations : la comparaison équitable, à réglage égal, est
+présentée à la section~\ref{sec:fair}.
 
 \section{Modèle final STAR-R}
 \begin{table}[htbp]
@@ -603,6 +634,215 @@ modèles tabulaires) prend environ une minute sur CPU, et la recherche sur la va
         $+0{,}008$ d'accuracy, $+0{,}020$ de F1, $+0{,}022$ de MCC. L'apport principal est la \textbf{stabilité}.
   \item Une régression logistique régularisée fait presque aussi bien : sur Ant, l'essentiel du signal se trouve dans
         les métriques, ce qui rejoint~\cite{lessmann2008,yang2016}.
+\end{itemize}
+\end{keybox}
+
+
+\section{Comparaison équitable et tests statistiques}
+\label{sec:fair}
+Tantithamthavorn et al.~\cite{tantithamthavorn2016} montrent que le réglage des hyperparamètres modifie le classement
+des méthodes. Le script \code{compare\_fair.py} donne donc \emph{le même budget de réglage} à chaque modèle, sur la
+seule validation Ant~1.6 (le test n'est pas chargé) :
+\begin{itemize}
+  \item \textbf{réseaux A2--A7} : grille taux d'apprentissage $\{10^{-3},3\cdot10^{-3}\}$ $\times$ weight decay
+        $\{10^{-4},10^{-3}\}$ $\times$ entrée $\Delta x$ (oui/non), plus $\lambda_c\in\{0{,}1;0{,}25\}$ et
+        $\lambda_r\in\{0{,}25;1\}$ quand la variante les utilise ; 3 graines ; époque choisie sur la courbe d'AP de
+        validation moyennée et lissée ;
+  \item \textbf{références tabulaires} (sur les métriques de $v_t$ et leurs variations) : régression logistique (LR),
+        Random Forest (RF), ExtraTrees (ET), boosting (A1) et un vote des $N$ plus proches voisins en similarité cosinus,
+        proche de la règle de décision de Rhazi et al.~\cite{rhazi2026} ;
+  \item ré-entraînement sur 1.5 + 1.6 avec 10 graines, puis évaluation unique sur 1.7.
+\end{itemize}
+
+\begin{table}[H]
+\centering\small
+\caption{Ant 1.7, réglage égal. AP : moyenne $\pm$ écart-type sur 10 graines ; IC : bootstrap à 95\,\% de l'ensemble
+des 10 graines. $P_{\mathrm{opt}}$ et R@20\,\%LOC : tri par densité score/LOC.}
+\label{tab:fair}
+\rowcolors{2}{}{lightbg}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Modèle} & \textbf{AP} & \textbf{IC 95\,\% de l'AP} & $\boldsymbol{P_{\mathrm{opt}}}$ & \textbf{R@20\%LOC} \\
+\midrule
+A1 Boosting                 & 0,748              & [0,655 ; 0,840] & 0,738 & 0,333 \\
+A2 TCN + BCE                & 0,801 $\pm$ 0,004 & [0,725 ; 0,865] & 0,708 & 0,287 \\
+A3 + graphe                 & 0,799 $\pm$ 0,004 & [0,728 ; 0,866] & 0,711 & 0,287 \\
+A4 + fusion cos.            & 0,801 $\pm$ 0,005 & [0,734 ; 0,866] & 0,713 & 0,306 \\
+A5 + InfoNCE                & 0,802 $\pm$ 0,009 & [0,734 ; 0,866] & 0,717 & 0,300 \\
+A6 + RankNet (STAR)         & 0,794 $\pm$ 0,008 & [0,717 ; 0,866] & 0,711 & 0,300 \\
+A7 STAR+                    & 0,644 $\pm$ 0,035 & [0,580 ; 0,767] & 0,633 & 0,291 \\
+Régression logistique       & 0,798              & [0,721 ; 0,865] & 0,714 & 0,324 \\
+Random Forest               & \best{0,809 $\pm$ 0,002} & [0,725 ; 0,880] & \best{0,750} & 0,351 \\
+ExtraTrees                  & 0,808 $\pm$ 0,007 & [0,723 ; 0,878] & 0,738 & \best{0,363} \\
+$k$ plus proches voisins (cos.) & 0,789          & [0,702 ; 0,864] & 0,710 & 0,294 \\
+Mélange STAR + LR + ET      & 0,806              & [0,724 ; 0,874] & 0,721 & 0,333 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering\small
+\caption{Ablation à réglage égal : effet de chaque mécanisme ajouté (Ant 1.7, test de Wilcoxon sur les 10 graines).}
+\label{tab:ladder}
+\rowcolors{2}{}{lightbg}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Étape} & \textbf{$\Delta$AP} & \textbf{$p$} & \textbf{$\Delta P_{\mathrm{opt}}$ (densité)} & \textbf{$p$} \\
+\midrule
+A1 $\to$ A2 (TCN)               & $+0{,}054$ & 0,002 & $-0{,}031$ & 0,002 \\
+A2 $\to$ A3 (+ graphe)          & $-0{,}002$ & 0,13  & $+0{,}003$ & 0,16 \\
+A3 $\to$ A4 (+ fusion cos.)     & $+0{,}002$ & 0,32  & $+0{,}002$ & 0,63 \\
+A4 $\to$ A5 (+ InfoNCE)         & $+0{,}001$ & 0,49  & $+0{,}004$ & 0,19 \\
+A5 $\to$ A6 (+ RankNet)         & $-0{,}008$ & 0,049 & $-0{,}006$ & 0,049 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Le bootstrap apparié contre la régression logistique ne montre aucune différence significative d'AP pour A2--A6, RF,
+ET, le vote des voisins ou le mélange. En revanche, sur le classement sensible à l'effort ($P_{\mathrm{opt}}$ par
+densité), Random Forest ($+0{,}036$, IC $[+0{,}011;+0{,}063]$, $p=0{,}007$), ExtraTrees ($+0{,}024$, $p<0{,}001$) et
+le mélange STAR + LR + ET ($+0{,}008$, IC $[+0{,}002;+0{,}014]$, $p=0{,}006$) dépassent significativement la régression
+logistique.
+
+\begin{keybox}[Lecture]
+\begin{itemize}[leftmargin=1em]
+  \item À réglage égal, \textbf{aucun mécanisme de STAR n'apporte de gain significatif sur Ant} ; RankNet dégrade même
+        légèrement les résultats. La validation dit la même chose : tous les modèles sont entre 0,68 et 0,70 d'AP.
+  \item Avec 292 classes de test, l'IC de l'AP fait environ $\pm0{,}07$ : un effet réel inférieur à environ 0,03 n'est
+        pas détectable sur une seule version.
+  \item Le test de Wilcoxon sur les graines ne mesure que la variance d'entraînement ; le bootstrap sur les classes est
+        l'incertitude pertinente pour conclure.
+\end{itemize}
+\end{keybox}
+
+\section{Effort appris dans le modèle (STAR-E)}
+\label{sec:effort}
+STAR n'est sensible à l'effort qu'\emph{après} l'entraînement, par le tri score/LOC. La variante STAR-E intègre le coût
+dans le score, $s_i=\mathrm{rank}(z_i)-\gamma\log\mathrm{LOC}_i$, avec $\gamma$ fixé à 1 ou appris, et éventuellement
+des paires supplémentaires « petite classe défectueuse avant grande classe défectueuse » (ordre de l'oracle de
+$P_{\mathrm{opt}}$). Le réglage est fait sur le $P_{\mathrm{opt}}$ de validation.
+
+Le résultat est négatif : $\gamma$ appris converge vers 0,98, c'est-à-dire la règle score/LOC appliquée après coup, et
+$P_{\mathrm{opt}}$ vaut 0,711 (IC $[0{,}647;0{,}763]$), comme la régression logistique triée par densité (0,714) et en
+dessous de Random Forest (0,750 ; écart $-0{,}038$, $p=0{,}01$). Intégrer l'effort dans la perte n'apporte rien de plus
+que le tri par densité ; l'avantage de Random Forest tient à la qualité de ses probabilités, pas à l'effort.
+
+\section{Données d'autres projets}
+\label{sec:moredata}
+Ant ne fournit que 118 classes d'entraînement. Les neuf autres projets du kit (Camel, JEdit, Log4j, Lucene, POI,
+Synapse, Velocity, Xalan, Xerces) totalisent 13 fenêtres et 3\,399 classes étiquetées, chacune normalisée sur sa propre
+première fenêtre. Trois régimes sont comparés pour STAR (A5) et la régression logistique : autres projets seuls,
+entraînement conjoint (Ant représentant 50\,\% de la perte) et pré-entraînement suivi d'un ajustement sur Ant.
+
+Aucun régime n'améliore Ant 1.7 : l'entraînement conjoint coûte $-0{,}008$ d'AP à STAR (non significatif) et le
+pré-entraînement $-0{,}025$ ($p=0{,}03$) ; sans aucune donnée d'Ant, STAR atteint 0,734 d'AP. Les projets diffèrent trop
+(décalage de distribution). Mais \textbf{STAR supporte bien mieux ce mélange qu'un modèle linéaire} : avec les mêmes
+données, la régression logistique perd $-0{,}030$ d'AP ($p=0{,}002$), et STAR conjoint dépasse LR conjointe de
+$+0{,}029$ ($p=0{,}04$).
+
+\section{Améliorations de la fusion et du contraste}
+\label{sec:improve}
+Conformément au guide, plusieurs améliorations ont été proposées et évaluées à partir de A5, une seule modification à la
+fois, avec le même protocole (tableau~\ref{tab:improve}).
+
+\begin{table}[H]
+\centering\small
+\caption{Améliorations proposées (Ant 1.7, 10 graines). $\alpha$ : poids moyen de la vue temporelle.}
+\label{tab:improve}
+\rowcolors{2}{}{lightbg}
+\begin{tabularx}{\linewidth}{Xccc}
+\toprule
+\textbf{Variante} & \textbf{AP} & \textbf{$\Delta$AP vs A5 ($p$)} & $\boldsymbol{\alpha}$ \\
+\midrule
+A5 (référence)                                                  & 0,802 $\pm$ 0,009 & --- & 0,63 \\
+C1 InfoNCE sans faux négatifs (paires défectueuses masquées)    & 0,802 $\pm$ 0,009 & $+0{,}001$ (0,33) & 0,62 \\
+C2 Contraste supervisé hybride~\cite{khosla2020}                & 0,802 $\pm$ 0,008 & $+0{,}000$ (0,90) & 0,70 \\
+G1 La porte voit aussi $|z_T-z_S|$                              & 0,791 $\pm$ 0,015 & $-0{,}011$ (0,049, graines) & 0,76 \\
+\textbf{G2 Régularisation par l'entropie de la porte}           & 0,802 $\pm$ 0,009 & $+0{,}000$ (0,83) & \best{0,55} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Les faux négatifs de l'InfoNCE ne limitent pas STAR sur Ant : avec 20 classes défectueuses à l'entraînement, ils sont
+rares. \textbf{G2 est l'amélioration retenue} : elle atteint son objectif, faire utiliser les deux vues de façon
+équilibrée ($\alpha$ de 0,63 à 0,55), sans aucune perte de performance, ce qui rend l'analyse des poids de fusion plus
+informative.
+
+\newpage
+\section{Généralisation à Camel, POI et JEdit}
+\label{sec:transfer}
+\subsection{Réglages figés depuis Ant}
+Le script \code{transfer\_study.py} applique aux autres projets toutes les configurations choisies sur Ant, sans
+aucun réglage sur leur version de test : Camel 1.4$\to$1.6 (565 classes, 127 défectueuses), POI 2.5$\to$3.0 (311,
+202) et JEdit 4.1+4.2$\to$4.3 (179, 5).
+
+\begin{table}[H]
+\centering\small
+\caption{AP sur la version de test de chaque projet, réglages figés depuis Ant (10 graines).}
+\label{tab:transfer}
+\rowcolors{2}{}{lightbg}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Modèle} & \textbf{Ant 1.7} & \textbf{Camel 1.6} & \textbf{POI 3.0} & \textbf{JEdit 4.3} \\
+\midrule
+Régression logistique         & 0,798 & 0,420 & 0,872 & 0,277 \\
+Random Forest                 & 0,809 & 0,435 & 0,918 & 0,284 \\
+ExtraTrees                    & 0,808 & 0,486 & 0,911 & 0,337 \\
+A2 TCN                        & 0,801 & 0,438 & 0,877 & 0,261 \\
+A3 + graphe                   & 0,799 & 0,475 & 0,743 & 0,243 \\
+A5 + InfoNCE                  & 0,802 & 0,439 & 0,857 & 0,242 \\
+A6 STAR                       & 0,794 & 0,458 & 0,811 & 0,260 \\
+STAR (A5) conjoint inter-projets & 0,795 & 0,440 & \best{0,920} & 0,290 \\
+Régression logistique conjointe  & 0,768 & 0,412 & 0,896 & 0,278 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Sur Camel, le graphe apporte un gain significatif (A3 : $+0{,}066$ d'AP contre LR, $p<0{,}001$). Sur POI, les variantes
+avec graphe s'effondrent avec les réglages d'Ant, mais STAR entraîné avec les autres projets y est le meilleur modèle
+($+0{,}059$ grâce aux données conjointes, $p=0{,}016$). STAR conjoint dépasse LR conjointe sur Ant ($p=0{,}04$) et POI
+($p=0{,}02$), avec une tendance sur Camel ($p=0{,}07$). JEdit, avec 5 défauts, n'est pas interprétable.
+
+\subsection{Réglage interne à la version d'entraînement (Camel)}
+Les réglages d'Ant ne conviennent pas forcément aux autres projets (POI compte 68\,\% de classes défectueuses à
+l'entraînement, contre 17\,\% pour Ant). Le script \code{retune\_project.py} règle donc chaque modèle \emph{à
+l'intérieur} de la version d'entraînement : trois partitions stratifiées de ses classes, le graphe restant entier et la
+perte ne voyant que les classes d'entraînement de la partition ; puis ré-entraînement sur toute la version et test
+unique.
+
+\begin{table}[H]
+\centering\small
+\caption{Camel 1.6 avec réglage interne à Camel 1.4 (10 graines). Écarts contre la régression logistique : bootstrap
+apparié.}
+\label{tab:retune}
+\rowcolors{2}{}{lightbg}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Modèle} & \textbf{AP} & \textbf{AP (réglages d'Ant)} & \textbf{$\Delta$AP vs LR} & \textbf{$p$} \\
+\midrule
+Régression logistique   & 0,452              & 0,420 & ---         & ---   \\
+Random Forest           & 0,475 $\pm$ 0,006 & 0,435 & $+0{,}026$ & 0,43  \\
+ExtraTrees              & 0,486 $\pm$ 0,004 & 0,486 & $+0{,}035$ & 0,16  \\
+A2 TCN                  & 0,490 $\pm$ 0,009 & 0,438 & $+0{,}056$ & 0,049 \\
+A3 + graphe             & 0,498 $\pm$ 0,026 & 0,475 & $+0{,}086$ & 0,009 \\
+A4 + fusion cos.        & 0,500 $\pm$ 0,019 & 0,462 & $+0{,}090$ & 0,010 \\
+A5 + InfoNCE            & \best{0,507 $\pm$ 0,013} & 0,439 & \best{$+0{,}088$} & \best{0,003} \\
+A6 + RankNet            & 0,462 $\pm$ 0,023 & 0,458 & $+0{,}047$ & 0,14  \\
+Mélange STAR + LR + ET  & 0,517              & 0,459 & $+0{,}065$ & 0,002 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{keybox}[Lecture]
+\begin{itemize}[leftmargin=1em]
+  \item Régler sur les données du projet profite à tous les réseaux (A5 : de 0,439 à 0,507 d'AP), presque pas aux
+        modèles tabulaires : les réglages d'Ant handicapaient STAR.
+  \item Ainsi réglés, \textbf{A3--A5 dépassent la régression logistique d'environ $+0{,}09$ d'AP ($p\le0{,}01$)}, le
+        plus grand écart de l'étude. Le mélange dépasse aussi LR en $P_{\mathrm{opt}}$ ($+0{,}020$, $p=0{,}010$).
+  \item \textbf{RankNet dégrade de nouveau} (A6 contre A5 : $-0{,}041$ d'AP, $p=0{,}011$), comme sur Ant : la version
+        recommandée de STAR est A5, avec la régularisation G2.
+  \item Le même réglage interne reste à exécuter sur POI, pour vérifier si l'effondrement observé avec les réglages
+        d'Ant vient de ces réglages.
 \end{itemize}
 \end{keybox}
 
@@ -663,6 +903,9 @@ sur Ant 1.7 (moyenne des 10 réseaux).}
   \item \textbf{L'accord cosinus discrimine peu} : 0,86 en moyenne pour les défectueuses contre 0,84 pour les saines.
         Les deux vues sont fortement alignées (effet de l'InfoNCE), si bien que l'accord porte peu d'information propre.
         Cela explique pourquoi la fusion guidée (A4) apporte peu par rapport à la fusion classique (A3).
+  \item Avec la régularisation par l'entropie de la porte (G2, section~\ref{sec:improve}), le poids temporel moyen
+        descend à 0,55 sans perte de performance : la domination de la vue temporelle n'est donc pas nécessaire à la
+        qualité du classement.
 \end{itemize}
 
 \section{Analyse des erreurs}
@@ -742,6 +985,38 @@ saine.
         Ajouter ces métriques de processus~\cite{moser2008} est la piste la plus prometteuse pour les détecter.
 \end{itemize}
 
+
+\section{Pourquoi le graphe aide sur Camel}
+\label{sec:graph}
+Le script \code{graph\_analysis.py} mesure, sur la version de test de chaque projet, la structure du graphe d'imports et
+l'apport du graphe (A3 contre A2, réglages d'Ant, 5 graines) séparément pour les classes isolées (aucun import entrant
+ni sortant) et connectées. Les labels ne servent qu'à l'évaluation.
+
+\begin{table}[H]
+\centering\small
+\caption{Graphe d'imports et apport du graphe selon la connectivité (version de test).}
+\label{tab:graph}
+\rowcolors{2}{}{lightbg}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}Xccc}
+\toprule
+ & \textbf{Ant 1.7} & \textbf{Camel 1.6} & \textbf{POI 3.0} \\
+\midrule
+Classes isolées                                   & 12,7\,\% & 14,2\,\% & 25,4\,\% \\
+\% défectueuses : isolées $\to$ connectées & 21,6 $\to$ 36,9 ($\times$1,7) & \best{1,3 $\to$ 26,0 ($\times$20)} & 55,7 $\to$ 68,1 ($\times$1,2) \\
+Homophilie (voisins défectueux : déf.\ $-$ saines) & $+0{,}03$ & $-0{,}01$ & $+0{,}12$ \\
+Apport du graphe, classes connectées ($\Delta$AP) & $+0{,}001$ & \best{$+0{,}052$} & $-0{,}152$ \\
+Apport du graphe, classes isolées ($\Delta$AP)    & $+0{,}005$ & $-0{,}001$ & $-0{,}000$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Sur Camel, une classe isolée n'est presque jamais défectueuse (1 sur 80), et tout le gain du graphe porte sur les
+classes connectées. Les classes défectueuses ne s'importent pas davantage entre elles (homophilie nulle) : le signal est
+la \emph{connectivité} elle-même, que l'agrégation de GraphSAGE capte et que les métriques de couplage (CBO, Ca, Ce) ne
+reflètent qu'en partie. Sur Ant, ce contraste est faible ($\times$1,7) et le graphe n'ajoute rien. Sur POI, le graphe
+dégrade les résultats malgré la plus forte homophilie : la cause la plus probable est le transfert des réglages d'Ant.
+Avec trois projets informatifs, il s'agit d'une explication corrélationnelle, non d'une preuve.
+
 % ============================================================ 7. Application
 \chapter{Application de visualisation}
 
@@ -774,6 +1049,13 @@ python run_star.py --project ant --seeds 42 43 44 45 46
 python explore_val.py --project ant
 python train_final.py --project ant --groups 5 --ens 10
 python analyse_star.py --project ant
+python compare_fair.py --project ant        # sec. 5.4 (~6,5 min)
+python effort_star.py --project ant         # sec. 5.5 (~4 min)
+python more_data.py --project ant           # sec. 5.6 (~4 min)
+python improve_star.py --project ant        # sec. 5.7 (~5 min)
+python transfer_study.py                    # sec. 5.8 (~5 min)
+python retune_project.py --projects camel   # sec. 5.8 (~6 min)
+python graph_analysis.py                    # sec. 6.4 (15 s)
 streamlit run app.py
 \end{verbatim}
 \end{tcolorbox}
@@ -787,28 +1069,46 @@ les imports) avec fusion guidée par similarité, InfoNCE inter-vues et RankNet.
 fuite. La procédure STAR-R réduit fortement la variance et atteint sur Ant 1.7 une AP de 0,799, une accuracy de
 0,823 et un F1 de 0,745.
 
-En réponse à la question de recherche, la fusion guidée et l'alignement contrastif ne sont \textbf{pas confirmés}
-comme supérieurs à une référence tabulaire bien réglée sur ce jeu de données : la vue temporelle porte l'essentiel
-du signal, et l'accord entre les vues discrimine peu. En revanche, l'ordre d'inspection compte beaucoup : trier par
-densité de risque multiplie par 2,5 les défauts trouvés à budget égal.
+En réponse à la question de recherche, la réponse est \textbf{nuancée et dépend du projet} :
+\begin{itemize}
+  \item \textbf{Sur Ant}, à réglage égal, la fusion guidée et l'alignement contrastif ne sont pas supérieurs à une
+        référence tabulaire bien réglée ; aucun mécanisme n'a d'effet significatif, et l'accord entre les vues
+        discrimine peu.
+  \item \textbf{Sur Camel}, réglé sur ses propres données, STAR avec le graphe dépasse la régression logistique
+        d'environ $+0{,}09$ d'AP ($p\le0{,}01$). Le graphe y apporte un signal de connectivité que les métriques ne
+        contiennent pas.
+  \item \textbf{STAR exploite mieux qu'un modèle linéaire les données d'autres projets} (Ant, POI, tendance sur Camel),
+        et le mélange STAR + LR + ET améliore le classement sensible à l'effort sur Ant et Camel.
+  \item \textbf{RankNet dégrade les résultats} sur Ant comme sur Camel, et intégrer l'effort dans la perte (STAR-E)
+        n'apporte rien de plus que le tri par densité.
+\end{itemize}
+L'ordre d'inspection compte beaucoup : trier par densité de risque multiplie par 2,5 les défauts trouvés à budget égal
+sur Ant. Les modèles à base d'arbres (Random Forest, ExtraTrees) restent les références sensibles à l'effort les plus
+sûres.
 
 \section{Limites}
 \begin{itemize}
-  \item Un seul projet exploitable avec trois fenêtres, et 118 classes d'entraînement.
-  \item Classes nouvelles exclues, d'où un biais de sélection ; graphe d'imports partiel.
+  \item Un seul projet (Ant) dispose de trois fenêtres exploitables, avec 118 classes d'entraînement ; Camel et POI
+        n'ont pas de version de validation indépendante, et JEdit 4.3 ne contient que 5 défauts.
+  \item Une seule version de test par projet : avec quelques centaines de classes, les intervalles de confiance de
+        l'AP sont larges (environ $\pm0{,}07$ à $\pm0{,}09$).
+  \item Classes nouvelles exclues, d'où un biais de sélection ; leurs labels ne figurent pas dans le kit. Graphe
+        d'imports partiel.
   \item Les mêmes classes apparaissent à l'entraînement et au test, à des versions différentes.
   \item Détection des défauts de la version courante, et non prédiction prospective.
 \end{itemize}
 
 \section{Perspectives}
 \begin{itemize}
-  \item Évaluation inter-projets (Camel, POI, Xalan) avec une normalisation adaptée.
-  \item GNN temporel sur le graphe multi-versions déjà fourni (\code{\_graph\_temporal.npz}), et prise en compte des
-        classes nouvelles.
+  \item Terminer le réglage interne sur POI et classer tous les modèles par la méthode de Scott-Knott ESD, déjà
+        implémentée.
+  \item Adaptation de domaine pour tirer parti des données d'autres projets (normalisation par projet apprise,
+        pondération des projets sources selon leur ressemblance avec le projet cible).
+  \item GNN temporel sur le graphe multi-versions déjà fourni (\code{\_graph\_temporal.npz}) et étude des classes
+        nouvelles, à partir de l'archive PROMISE complète.
   \item Ajout de métriques de processus (nombre de modifications, auteurs) pour mieux détecter les petites classes
         défectueuses.
-  \item Intégration directe de l'effort dans l'apprentissage du classement, et protocole réellement prospectif
-        ($t\to t+1$).
+  \item Protocole réellement prospectif ($t\to t+1$), après vérification de la disponibilité des labels.
 \end{itemize}
 
 % ============================================================ Bibliographie
@@ -855,6 +1155,12 @@ densité de risque multiplie par 2,5 les défauts trouvés à budget égal.
   \emph{IEEE Transactions on Software Engineering}, 39(6):757--773, 2013.
 \bibitem{yang2016} Y.~Yang et al., ``Effort-aware just-in-time defect prediction: Simple unsupervised models could be
   better than supervised models,'' in \emph{Proc. FSE}, 2016.
+\bibitem{efron1993} B.~Efron and R.~J. Tibshirani, \emph{An Introduction to the Bootstrap}, Chapman \& Hall, 1993.
+\bibitem{wilcoxon1945} F.~Wilcoxon, ``Individual comparisons by ranking methods,'' \emph{Biometrics Bulletin},
+  1(6):80--83, 1945.
+\bibitem{romano2006} J.~Romano, J.~D. Kromrey, J.~Coraggio and J.~Skowronek, ``Appropriate statistics for ordinal
+  level data: Should we really be using t-test and Cohen's d for evaluating group differences on the NSSE and other
+  surveys?,'' in \emph{Annual Meeting of the Florida Association of Institutional Research}, 2006.
 \end{thebibliography}
 
 \end{document}
