@@ -5,7 +5,7 @@ WhatsApp Image*.jpeg
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+.venv/
+venv/
 
-# Sorties d'entraînement
-KIT_MULTI_PROJETS/results/*
-!KIT_MULTI_PROJETS/results/README.txt
+# Résultats : conservés dans le dépôt (reproductibilité du rapport)

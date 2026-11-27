@@ -1,0 +1,154 @@
+{
+  "project": "ant",
+  "test": "1.7",
+  "blend": [
+    "STAR",
+    "LR",
+    "ET"
+  ],
+  "n": 292,
+  "positives": 102,
+  "Popt": {
+    "STAR-R (tri par risque)": 0.3689,
+    "STAR-R (tri par densité risque/LOC)": 0.7194,
+    "Boosting A1 (tri par risque)": 0.4794,
+    "Aléatoire": 0.502
+  },
+  "recall_at_LOC_budget": {
+    "STAR-R (tri par risque)": {
+      "10%LOC": 0.0503,
+      "20%LOC": 0.1286,
+      "30%LOC": 0.189,
+      "50%LOC": 0.3589
+    },
+    "STAR-R (tri par densité risque/LOC)": {
+      "10%LOC": 0.1863,
+      "20%LOC": 0.3254,
+      "30%LOC": 0.4545,
+      "50%LOC": 0.7095
+    },
+    "Boosting A1 (tri par risque)": {
+      "10%LOC": 0.091,
+      "20%LOC": 0.1598,
+      "30%LOC": 0.2368,
+      "50%LOC": 0.4601
+    },
+    "Aléatoire": {
+      "10%LOC": 0.1016,
+      "20%LOC": 0.2005,
+      "30%LOC": 0.3002,
+      "50%LOC": 0.5038
+    }
+  },
+  "flagged_k": 96,
+  "alpha_temporal": {
+    "sains": {
+      "moyenne": 0.6616,
+      "ecart_type": 0.0383
+    },
+    "defectueux": {
+      "moyenne": 0.7221,
+      "ecart_type": 0.0783
+    }
+  },
+  "agreement_cos": {
+    "sains": {
+      "moyenne": 0.838,
+      "ecart_type": 0.0767
+    },
+    "defectueux": {
+      "moyenne": 0.8604,
+      "ecart_type": 0.0407
+    }
+  },
+  "median_LOC": {
+    "sains": 104.5,
+    "defectueux": 517.0,
+    "faux_positifs": 377.0,
+    "defauts_manques": 182.0
+  },
+  "top_false_positives": [
+    {
+      "rang_risque": 5,
+      "classe": "org.apache.tools.ant.taskdefs.Execute",
+      "loc": 1095.0,
+      "wmc": 33.0,
+      "cbo": 70.0,
+      "rfc": 121.0
+    },
+    {
+      "rang_risque": 17,
+      "classe": "org.apache.tools.ant.taskdefs.ExecuteJava",
+      "loc": 552.0,
+      "wmc": 13.0,
+      "cbo": 24.0,
+      "rfc": 82.0
+    },
+    {
+      "rang_risque": 31,
+      "classe": "org.apache.tools.ant.types.CommandlineJava",
+      "loc": 559.0,
+      "wmc": 39.0,
+      "cbo": 21.0,
+      "rfc": 94.0
+    },
+    {
+      "rang_risque": 39,
+      "classe": "org.apache.tools.ant.types.XMLCatalog",
+      "loc": 874.0,
+      "wmc": 28.0,
+      "cbo": 17.0,
+      "rfc": 105.0
+    },
+    {
+      "rang_risque": 40,
+      "classe": "org.apache.tools.ant.taskdefs.PathConvert",
+      "loc": 507.0,
+      "wmc": 21.0,
+      "cbo": 12.0,
+      "rfc": 61.0
+    }
+  ],
+  "worst_missed_defects": [
+    {
+      "rang_risque": 201,
+      "classe": "org.apache.tools.ant.util.Watchdog",
+      "loc": 112.0,
+      "wmc": 7.0,
+      "cbo": 3.0,
+      "rfc": 22.0
+    },
+    {
+      "rang_risque": 209,
+      "classe": "org.apache.tools.ant.taskdefs.rmic.WLRmic",
+      "loc": 130.0,
+      "wmc": 4.0,
+      "cbo": 9.0,
+      "rfc": 22.0
+    },
+    {
+      "rang_risque": 254,
+      "classe": "org.apache.tools.ant.types.Substitution",
+      "loc": 33.0,
+      "wmc": 4.0,
+      "cbo": 5.0,
+      "rfc": 7.0
+    },
+    {
+      "rang_risque": 257,
+      "classe": "org.apache.tools.ant.NoBannerLogger",
+      "loc": 57.0,
+      "wmc": 4.0,
+      "cbo": 4.0,
+      "rfc": 17.0
+    },
+    {
+      "rang_risque": 264,
+      "classe": "org.apache.tools.ant.BuildListener",
+      "loc": 7.0,
+      "wmc": 7.0,
+      "cbo": 16.0,
+      "rfc": 7.0
+    }
+  ]
+}

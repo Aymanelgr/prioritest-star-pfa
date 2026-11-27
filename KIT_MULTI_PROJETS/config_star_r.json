@@ -1,0 +1,9 @@
+{
+  "source": "explore_val.py on ant (train 1.5 / validation 1.6, test never loaded); top config by seed-averaged smoothed validation AP",
+  "model": {"use_graph": true, "similarity_gate": true, "lambda_c": 0.1, "lambda_r": 0.25,
+            "use_delta": true, "bidirectional": false, "dropout": 0.0, "label_aware": false, "effort_aware": false},
+  "hp": {"lr": 0.001, "weight_decay": 0.001, "temperature": 0.2},
+  "epochs": 64,
+  "lr_C": 0.03,
+  "preprocessing": "signed_log on train-fitted z-scores; pos_weight in BCE"
+}

@@ -1,0 +1,15 @@
+Please inspect the entire project folder and understand how the current model, data pipeline, and training setup work before making changes.
+
+Then improve the model and training process to achieve the best reliable performance you can. Work locally in this project and use the available GPU if the environment supports it.
+
+Please:
+1. Identify the current model, dataset, training settings, and evaluation method.
+2. Check for implementation issues, data leakage, class imbalance, and other factors that could distort results.
+3. Record the current baseline performance if it can be reproduced.
+4. Make well-justified improvements to the model or training setup. You may adjust the architecture, preprocessing, learning rate, batch size, and number of epochs where appropriate.
+5. Train and evaluate the improved model. Use validation performance and early stopping or another suitable method to avoid overfitting. Keep the test set untouched until final evaluation.
+6. Save the trained model and any necessary configuration or code changes in the project.
+7. Report the final accuracy, the evaluation split it came from, and—if available—other useful metrics such as precision, recall, and F1. Compare it with the baseline and summarize what changed.
+8. Include the exact command used to train the model, the training duration, and any GPU or environment limitations.
+
+Do not claim a result unless you actually ran the evaluation. If training cannot run in this environment, explain what prevented it and give me the exact commands to run locally in VS Code.

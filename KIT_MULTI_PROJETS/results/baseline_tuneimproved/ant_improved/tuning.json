@@ -1,0 +1,25 @@
+{
+  "A5_plus_InfoNCE": {
+    "params": {
+      "lambda_c": 0.5,
+      "temperature": 0.1
+    },
+    "AP_validation": 0.7173
+  },
+  "A6_STAR_full": {
+    "params": {
+      "lambda_c": 0.1,
+      "temperature": 0.5,
+      "lambda_r": 0.25
+    },
+    "AP_validation": 0.697
+  },
+  "A7_STAR_plus": {
+    "params": {
+      "lambda_c": 0.1,
+      "temperature": 0.2,
+      "lambda_r": 0.25
+    },
+    "AP_validation": 0.6549
+  }
+}
